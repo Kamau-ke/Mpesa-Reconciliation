@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone');
             $table->enum('role',['staff', 'owner']);
-            $table->bigInteger('shop_id');
+            $table->foreignId('shop_id')->constrained('shop');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
