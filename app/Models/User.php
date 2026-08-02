@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -28,7 +29,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password','role'])]
+#[Fillable(['name', 'email', 'password','role','status'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -51,9 +52,31 @@ class User extends Authenticatable implements PasskeyUser
         ];
     }
 
-    public function shop():HasMany{
+    public function ownedShops():HasMany{
         return $this->hasMany(Shop::class);
     }
+
+    // for staffs 
+     public function assignedShop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class, 'shop_id');
+    }
+
+    public function isOwner(){
+        return $this->role==='owner';
+    }
+
+    public function isStaff(){
+        return $this->role==='staff';
+    }
+
+    public function isActive(){
+        return $this->status==='active';
+    }
+
+
+
+
 
     
 }
