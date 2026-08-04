@@ -1,36 +1,4 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { dashboard } from '@/routes';
+import type { SVGProps } from 'react'; type IconName = | 'home' | 'sparkles' | 'receipt' | 'mapPin' | 'check' | 'calculator' | 'phone' | 'shield' | 'stall' | 'coin'; interface Props extends SVGProps<SVGSVGElement> { name: IconName; } export default function Icon({ name, className, ...props }: Props) { switch (name) { case 'home': return ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> </svg> ); case 'sparkles': return ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M12 3l2.2 4.5L19 10l-4.8 2.5L12 17l-2.2-4.5L5 10l4.8-2.5z" /> </svg> ); case 'receipt': return ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M7 3h10l2 4v14H5V7z" /> <path d="M9 11h6M9 15h4" /> </svg> ); case 'mapPin': return ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z" /> <circle cx="12" cy="11" r="2" /> </svg> ); case 'check': return ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M5 12l5 5L20 7" /> </svg> ); case 'calculator': return ( <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <rect x="10" y="6" width="28" height="36" rx="3" /> <line x1="16" y1="14" x2="32" y2="14" /> <circle cx="18" cy="24" r="2" /> <circle cx="30" cy="24" r="2" /> <circle cx="18" cy="34" r="2" /> <circle cx="30" cy="34" r="2" /> </svg> ); case 'phone': return ( <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <rect x="14" y="4" width="20" height="40" rx="4" /> <line x1="20" y1="10" x2="28" y2="10" /> <circle cx="24" cy="36" r="2" /> </svg> ); case 'shield': return ( <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M24 4l16 6v12c0 10-7 17-16 22C15 39 8 32 8 22V10l16-6z" /> <path d="M18 24l4 4 8-10" /> </svg> ); case 'stall': return ( <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}> <path d="M8 24h48l-4-12H12L8 24z" /> <path d="M12 24v28h40V24" /> <path d="M20 24v28M32 24v28M44 24v28" /> <path d="M16 12l4 12M28 12l4 12M40 12l4 12M52 12l4 12" /> </svg> ); case 'coin': return ( <svg viewBox="0 0 64 64" fill="none" className={className} {...props}> <circle cx="32" cy="32" r="28" fill="#F2B84B" stroke="#2B2B2B" strokeWidth="3" /> <circle cx="32" cy="32" r="18" stroke="#2B2B2B" strokeWidth="2" strokeDasharray="3 3" /> <path d="M24 40c3-7 6-14 12-16 5-1 8 3 8 7 0 7-5 11-14 11-3 0-5-1-6-2z" fill="#FFF4DA" stroke="#2B2B2B" strokeWidth="2" strokeLinejoin="round" /> </svg> ); default: return null; } }
 
-export default function Dashboard() {
-    return (
-        <>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
-            </div>
-        </>
-    );
-}
 
-Dashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
-};
+
