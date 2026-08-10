@@ -6,11 +6,11 @@ import StallCard from '@/components/kadogo/stall-card';
 import Dock from '@/components/kadogo/dock';
 import { dashboard, register } from '@/routes';
 
-const CREAM = '#FFF4DA';
-const CHAR = '#2B2B2B';
-const AVOCADO = '#4E7D67';
-const TOMATO = '#E85D5D';
-const MANGO = '#F2B84B';
+const CREAM = '#F5F5F5';
+const CHAR = '#101010';
+const AVOCADO = '#43B47E';
+const TOMATO = '#D65A5A';
+const MANGO = '#D9B75A';
 
 const display = { fontFamily: '"Baloo 2", ui-rounded, sans-serif' };
 

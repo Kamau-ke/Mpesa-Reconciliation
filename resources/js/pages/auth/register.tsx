@@ -21,7 +21,7 @@ export default function Register({ passwordRules }: Props) {
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-6 [&_label]:font-bold [&_label]:text-[#F5F5F5] [&_label]:[font-family:'Baloo_2',ui-rounded,sans-serif] [&_[data-slot=input]]:h-11 [&_[data-slot=input]]:rounded-xl [&_[data-slot=input]]:border-[#353538] [&_[data-slot=input]]:bg-[#242426] [&_[data-slot=input]]:text-[#F5F5F5] [&_[data-slot=input]]:placeholder:text-[#A7A7AB]"
             >
                 {({ processing, errors }) => (
                     <>
@@ -106,7 +106,8 @@ export default function Register({ passwordRules }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="mt-2 h-12 w-full rounded-xl bg-[#43B47E] text-base font-bold text-[#101010] hover:bg-[#57C68E]"
+                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                 tabIndex={6}
                                 data-test="register-user-button"
                             >
@@ -115,9 +116,9 @@ export default function Register({ passwordRules }: Props) {
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="text-center text-sm" style={{ color: '#A7A7AB' }}>
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={7}>
+                            <TextLink href={login()} tabIndex={7} className="font-bold text-[#43B47E] decoration-[#43B47E]">
                                 Log in
                             </TextLink>
                         </div>

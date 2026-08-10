@@ -33,7 +33,7 @@ export default function Login({ status, canResetPassword }: Props) {
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-6 [&_label]:font-bold [&_label]:text-[#F5F5F5] [&_label]:[font-family:'Baloo_2',ui-rounded,sans-serif] [&_[data-slot=input]]:h-11 [&_[data-slot=input]]:rounded-xl [&_[data-slot=input]]:border-[#353538] [&_[data-slot=input]]:bg-[#242426] [&_[data-slot=input]]:text-[#F5F5F5] [&_[data-slot=input]]:placeholder:text-[#A7A7AB] [&_[data-slot=checkbox]]:border-[#353538] [&_[data-slot=checkbox]]:data-[state=checked]:bg-[#43B47E] [&_[data-slot=checkbox]]:data-[state=checked]:border-[#43B47E]"
             >
                 {({ processing, errors }) => (
                     <>
@@ -59,7 +59,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-sm text-[#43B47E] decoration-[#43B47E]"
                                             tabIndex={5}
                                         >
                                             Forgot your password?
@@ -88,7 +88,8 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 h-12 w-full rounded-xl bg-[#43B47E] text-base font-bold text-[#101010] hover:bg-[#57C68E]"
+                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -99,9 +100,9 @@ export default function Login({ status, canResetPassword }: Props) {
                         </div>
 
                         {/* @chisel-registration */}
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="text-center text-sm" style={{ color: '#A7A7AB' }}>
                             Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
+                            <TextLink href={register()} tabIndex={5} className="font-bold text-[#43B47E] decoration-[#43B47E]">
                                 Sign up
                             </TextLink>
                         </div>
@@ -111,7 +112,7 @@ export default function Login({ status, canResetPassword }: Props) {
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="mb-4 rounded-xl border border-[#2F8058] bg-[#103D2B] p-3 text-center text-sm font-medium text-[#8FE1B4]">
                     {status}
                 </div>
             )}

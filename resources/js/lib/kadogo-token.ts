@@ -4,25 +4,25 @@
 
 export const K = {
   // backgrounds
-  bg:       '#F5F5F5',   // page
-  top:      '#1C1C1E',   // top bar
-  tab:      '#2C2C2E',   // tab nav
-  hero:     '#2C2C2E',   // hero card
-  card:     '#E8E8E8',   // stat cards, table bg, panels
-  cardAlt:  '#D4D4D4',   // table headers, alt rows, panel headers
-  cardDeep: '#DCDCDC',   // input bg
+  bg:       '#101010',   // page
+  top:      '#101010',   // top bar
+  tab:      '#1D1D1F',   // tab nav
+  hero:     '#1D1D1F',   // hero card
+  card:     '#1D1D1F',   // stat cards, table bg, panels
+  cardAlt:  '#242426',   // table headers, alt rows, panel headers
+  cardDeep: '#242426',   // input bg
 
   // accent
-  gold:     '#F2B84B',   // wordmark, total, active tab underline, buttons, avatar
-  goldDim:  '#C8962A',   // hover state for gold elements
+  gold:     '#43B47E',   // primary action, active tab underline, avatar
+  goldDim:  '#319362',   // hover state
 
   // text
-  ink:      '#1C1C1E',   // primary text
-  muted:    '#888888',   // secondary labels, timestamps
-  mutedDk:  '#666666',   // table column headers, field labels
+  ink:      '#F5F5F5',   // primary text
+  muted:    '#A7A7AB',   // secondary labels, timestamps
+  mutedDk:  '#C4C4C7',   // table column headers, field labels
 
   // status — never change these; duplicated txn row must stay unmistakably red
-  paidBg:   '#2C2C2E',
+  paidBg:   '#103D2B',
   paidC:    '#F5F5F5',
   dupBg:    '#FEF2F2',
   dupPill:  '#FDEAEA',
