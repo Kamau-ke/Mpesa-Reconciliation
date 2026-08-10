@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { router, useForm } from '@inertiajs/react';
 
 const CHAR = '#2B2B2B';
 const CREAM = '#FFF4DA';
@@ -17,29 +17,6 @@ type StaffMember = {
     addedOn: string;
 };
 
-const DUMMY_STAFF: StaffMember[] = [
-    {
-        id: 1,
-        name: 'Ian Kamau',
-        email: 'ian@example.com',
-        status: 'active',
-        addedOn: '02 Aug 2026',
-    },
-    {
-        id: 2,
-        name: 'Grace Wanjiru',
-        email: 'grace@example.com',
-        status: 'active',
-        addedOn: '30 Jul 2026',
-    },
-    {
-        id: 3,
-        name: 'Daniel Otieno',
-        email: 'daniel@example.com',
-        status: 'deactivated',
-        addedOn: '18 Jul 2026',
-    },
-];
 
 function PlusIcon() {
     return (
@@ -65,14 +42,17 @@ function initials(name: string): string {
 }
 
 function AddStaffForm() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        password_confirmation: '',
+    });
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        alert(`Dummy add: ${name} (${email})`);
-        setName('');
-        setEmail('');
+        post('/employees', { onSuccess: () => reset() });
     }
 
     return (
@@ -84,15 +64,15 @@ function AddStaffForm() {
                 Add a staff member
             </h3>
 
-            <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={submit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex-1">
                     <label htmlFor="staff-name" className="sr-only">
                         Name
                     </label>
                     <input
                         id="staff-name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={data.name}
+                        onChange={(e) => setData('name', e.target.value)}
                         placeholder="Full name"
                         required
                         className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:ring-2"
@@ -112,8 +92,8 @@ function AddStaffForm() {
                     <input
                         id="staff-email"
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
                         placeholder="Email address"
                         required
                         className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:ring-2"
@@ -126,15 +106,32 @@ function AddStaffForm() {
                     />
                 </div>
 
+                <div>
+                    <label htmlFor="staff-phone" className="sr-only">Phone number</label>
+                    <input id="staff-phone" type="tel" value={data.phone} onChange={(e) => setData('phone', e.target.value)} placeholder="Phone number" required className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:ring-2" style={{ fontFamily: MONO, borderColor: RULE, background: '#FFFBF2', color: CHAR }} />
+                </div>
+
+                <div>
+                    <label htmlFor="staff-password" className="sr-only">Temporary password</label>
+                    <input id="staff-password" type="password" value={data.password} onChange={(e) => setData('password', e.target.value)} placeholder="Temporary password" required minLength={8} className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:ring-2" style={{ fontFamily: MONO, borderColor: RULE, background: '#FFFBF2', color: CHAR }} />
+                </div>
+
+                <div>
+                    <label htmlFor="staff-password-confirmation" className="sr-only">Confirm password</label>
+                    <input id="staff-password-confirmation" type="password" value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} placeholder="Confirm password" required minLength={8} className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:ring-2" style={{ fontFamily: MONO, borderColor: RULE, background: '#FFFBF2', color: CHAR }} />
+                </div>
+
                 <button
                     type="submit"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm shrink-0 transition-opacity hover:opacity-90"
+                    disabled={processing}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm shrink-0 transition-opacity hover:opacity-90 disabled:opacity-60"
                     style={{ background: AVOCADO, color: CREAM, fontFamily: DISPLAY }}
                 >
                     <PlusIcon />
-                    Add staff
+                    {processing ? 'Adding...' : 'Add staff'}
                 </button>
             </form>
+            {Object.values(errors)[0] && <p className="mt-3 text-sm" style={{ color: TOMATO }}>{Object.values(errors)[0]}</p>}
         </div>
     );
 }
@@ -142,8 +139,10 @@ function AddStaffForm() {
 function StaffRow({ member }: { member: StaffMember }) {
     const isActive = member.status === 'active';
 
-    function deactivate() {
-        alert(`Dummy remove: ${member.name}`);
+    function remove() {
+        if (window.confirm(`Remove ${member.name}? They will lose access immediately.`)) {
+            router.delete(`/employees/${member.id}`);
+        }
     }
 
     return (
@@ -190,24 +189,21 @@ function StaffRow({ member }: { member: StaffMember }) {
                     {member.status}
                 </span>
 
-                {isActive && (
-                    <button
-                        onClick={deactivate}
-                        className="flex items-center gap-1 text-[12px] font-medium px-2 py-1 rounded-lg border transition-opacity hover:opacity-70"
-                        style={{ color: TOMATO, borderColor: TOMATO, fontFamily: MONO }}
-                        title="Revoke access immediately"
-                    >
-                        <XIcon />
-                        <span className="hidden md:inline">Remove</span>
-                    </button>
-                )}
+                <button
+                    onClick={remove}
+                    className="flex items-center gap-1 text-[12px] font-medium px-2 py-1 rounded-lg border transition-opacity hover:opacity-70"
+                    style={{ color: TOMATO, borderColor: TOMATO, fontFamily: MONO }}
+                    title="Remove this employee"
+                >
+                    <XIcon />
+                    <span className="hidden md:inline">Remove</span>
+                </button>
             </div>
         </div>
     );
 }
 
-export default function StaffPanel() {
-    const staff = DUMMY_STAFF;
+export default function StaffPanel({ staff }: { staff: StaffMember[] }) {
 
     const active = staff.filter((s) => s.status === 'active');
     const inactive = staff.filter((s) => s.status === 'deactivated');

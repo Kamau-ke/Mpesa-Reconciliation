@@ -18,6 +18,6 @@ class Shop extends Model
     }
 
     public function staffMembers():HasMany{
-        return $this->hasMany(User::class, 'user_id');
+        return $this->hasMany(User::class, 'shop_id');
     }
 }

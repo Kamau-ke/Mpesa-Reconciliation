@@ -113,6 +113,24 @@ class DashboardController extends Controller
         //         ]);
         // }
 
+        $shop = $user->isOwner()
+            ? $user->ownedShops()->first()
+            : $user->assignedShop;
+
+        $staff = $user->isOwner() && $shop
+            ? $shop->staffMembers()
+                ->where('role', 'staff')
+                ->oldest()
+                ->get()
+                ->map(fn (User $staffMember) => [
+                    'id' => $staffMember->id,
+                    'name' => $staffMember->name,
+                    'email' => $staffMember->email,
+                    'status' => $staffMember->status,
+                    'addedOn' => $staffMember->created_at?->format('d M Y'),
+                ])
+            : [];
+
         return Inertia::render('dashboard', [
             'shop'         => [
                 'id'         => 1,
@@ -129,8 +147,8 @@ class DashboardController extends Controller
             'avgSale'      => 300000,
             'flagged'      => 4,
             'transactions' => 30,
-            'staff'        => "staff",
-            'isOwner'      =>'Kamau',
+            'staff'        => $staff,
+            'isOwner'      => $user->isOwner(),
         ]);
     }
 }
