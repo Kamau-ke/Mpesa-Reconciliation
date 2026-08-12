@@ -1,12 +1,5 @@
-// resources/js/pages/dashboard.tsx
-//
-// Kadogo — Ink + Gold palette.
-// Dummy data is used when no real props are passed from the controller.
-// All monetary totals still follow the server-first rule — the dummy
-// data is only a fallback for local dev / design review; in production
-// DashboardController always supplies real props.
-
 import { useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import Seo from '@/components/kadogo/seo';
 import TopBar from '@/components/kadogo/dashboard/top-bar';
 import TabNav from '@/components/kadogo/dashboard/tab-nav';
@@ -16,6 +9,9 @@ import StaffPanel from '@/components/kadogo/dashboard/staff-panel';
 import ShopPanel from '@/components/kadogo/dashboard/shop-panel';
 import { K } from '@/lib/kadogo-token';
 import type { DashboardProps, TabKey } from '@/types/dashboard';
+
+
+
 
 // ── dummy data ────────────────────────────────────────────────────────────────
 const DUMMY_SHOP = {
@@ -179,17 +175,23 @@ export default function Dashboard({
     flagged      = DUMMY_FLAGGED,
     transactions = DUMMY_TRANSACTIONS as unknown as DashboardProps['transactions'],
     staff        = DUMMY_STAFF as unknown as DashboardProps['staff'],
-    isOwner      = true,
 }: Partial<DashboardProps>) {
     const [tab, setTab] = useState<TabKey>('overview');
+     const {user}=useAuth();
+    const isOwner=user.role==='owner'
 
     const props: DashboardProps = {
         shop, todayTotal, yesterdayTotal, weekTotal, monthTotal,
         txnCount, avgSale, flagged, transactions, staff, isOwner,
     };
 
+   
+
+
     return (
         <>
+
+        
             <Seo title="Dashboard" description="Your daily M-Pesa reconciliation." noindex />
 
             <div

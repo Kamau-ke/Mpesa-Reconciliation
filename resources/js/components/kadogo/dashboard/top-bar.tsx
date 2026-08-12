@@ -1,6 +1,7 @@
 // resources/js/components/kadogo/dashboard/top-bar.tsx
 
 import { Link, usePage } from '@inertiajs/react';
+import { useAuth } from '@/hooks/use-auth';
 import { useMemo } from 'react';
 import { logout } from '@/routes';
 import type { Shop } from '@/types/dashboard';
@@ -31,16 +32,16 @@ type Props = {
     shop: Shop | null;
 };
 
-const owner='Kamau';
+ 
 
 export default function TopBar({ shop }: Props) {
     const { auth } = usePage().props;
-
+    const {user}=useAuth();
+    const owner=user.name;
     const today = useMemo(
         () => new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }),
         [],
     );
-    console.log(shop)
 
     return (
         <header
@@ -72,18 +73,18 @@ export default function TopBar({ shop }: Props) {
             >
                 {today}
             </span>
-
+            
             {/* Right: role pill + avatar + logout */}
             <div className="flex items-center gap-3 shrink-0">
                 <span
                     className="hidden sm:inline text-[11px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider"
                     style={{
                         fontFamily: MONO,
-                        background: owner=== 'Kamau' ? AVOCADO : '#3D3D3D',
+                        background: owner=== auth.name ? AVOCADO : '#3D3D3D',
                         color: CREAM,
                     }}
                 >
-                    Owner
+                    {user.role}
                 </span>
 
                 <div
