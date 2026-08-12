@@ -199,7 +199,8 @@ export default function Dashboard({
                 style={{ background: K.bg, color: K.ink, fontFamily: K.body }}
             >
                 <TopBar shop={shop} />
-                <TabNav active={tab} onChange={setTab} isOwner={isOwner} />
+                {isOwner && <TabNav active={tab} onChange={setTab} isOwner={isOwner} /> }
+                
 
                 <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-20">
 
