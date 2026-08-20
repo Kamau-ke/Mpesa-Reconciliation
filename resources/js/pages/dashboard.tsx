@@ -1,240 +1,471 @@
+import { Head } from '@inertiajs/react';
+import {
+    CheckCircle2,
+    Clock,
+    Receipt,
+    Send,
+    ShieldCheck,
+    Smartphone,
+    TrendingUp,
+    Wallet,
+} from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import Seo from '@/components/kadogo/seo';
-import TopBar from '@/components/kadogo/dashboard/top-bar';
-import TabNav from '@/components/kadogo/dashboard/tab-nav';
-import StatCard from '@/components/kadogo/dashboard/stat-card';
-import TransactionTable from '@/components/kadogo/dashboard/transaction-table';
-import StaffPanel from '@/components/kadogo/dashboard/staff-panel';
-import ShopPanel from '@/components/kadogo/dashboard/shop-panel';
-import { K } from '@/lib/kadogo-token';
-import type { DashboardProps, TabKey } from '@/types/dashboard';
+import type { FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { dashboard } from '@/routes';
 
+/**
+ * Staff Dashboard — Kadogo
+ *
+ * View-only summary for shop staff, plus the ability to trigger an STK
+ * push ("Prompt client") so a customer can complete a Lipa na M-Pesa
+ * payment on their own phone. Per project rules, staff never see
+ * management controls and never compute totals client-side — all figures
+ * below are placeholder "server response" data shaped exactly like what
+ * the real StaffDashboardController would return, so wiring this up later
+ * is a drop-in prop swap.
+ *
+ * Money is treated as whole KES shillings (integers) throughout — never
+ * floats — matching the project's monetary-handling rule.
+ */
 
-
-
-// ── dummy data ────────────────────────────────────────────────────────────────
-const DUMMY_SHOP = {
-    id:         1,
-    name:       'Njoroge General Store',
-    tillNumber: '923481',
-    location:   'Kawangware, Nairobi',
-    currency:   'KES',
+type StaffTransaction = {
+    id: number;
+    mpesaReceipt: string;
+    amount: number;
+    payerPhoneMasked: string;
+    time: string;
 };
 
-const DUMMY_TRANSACTIONS = [
-    { id: 'QFX7R2KP', time: '07:04', payer: 'A. Mwathi',   amount: 250,   status: 'paid'    },
-    { id: 'QFX8T9LM', time: '07:31', payer: 'D. Otieno',   amount: 450,   status: 'paid'    },
-    { id: 'QFX2N4QR', time: '08:12', payer: 'A. Kimani',   amount: 2000,  status: 'paid'    },
-    { id: 'QFX9J1XZ', time: '08:45', payer: 'F. Mwangi',   amount: 800,   status: 'paid'    },
-    { id: 'QFX9J1XZ', time: '08:46', payer: 'F. Mwangi',   amount: 800,   status: 'flagged' },
-    { id: 'QFX3K7VB', time: '09:03', payer: 'M. Wanjiru',  amount: 1200,  status: 'paid'    },
-    { id: 'QFX1H5WD', time: '09:22', payer: 'S. Achieng',  amount: 1500,  status: 'paid'    },
-    { id: 'QFX6Y2TC', time: '09:40', payer: 'J. Kariuki',  amount: 300,   status: 'paid'    },
-    { id: 'QFX4P8NS', time: '10:05', payer: 'P. Njoroge',  amount: 950,   status: 'paid'    },
-    { id: 'QFX5M3RQ', time: '10:18', payer: 'B. Otieno',   amount: 600,   status: 'paid'    },
-    { id: 'QFX0L6YW', time: '10:44', payer: 'C. Waweru',   amount: 3200,  status: 'paid'    },
-    { id: 'QFXA1K9E', time: '11:02', payer: 'E. Ndungu',   amount: 750,   status: 'paid'    },
-    { id: 'QFXB3T2P', time: '11:29', payer: 'H. Kamau',    amount: 180,   status: 'paid'    },
-    { id: 'QFXC7W4V', time: '11:55', payer: 'L. Maina',    amount: 4200,  status: 'paid'    },
-    { id: 'QFXD2Q8U', time: '12:08', payer: 'N. Wairimu',  amount: 525,   status: 'paid'    },
-] as const;
+type StaffDashboardProps = {
+    staffName: string;
+    shopName: string;
+    tillNumber: string;
+    shiftStatus: 'active' | 'ended';
+    clockedInAt: string;
+    today: {
+        totalAmount: number;
+        transactionCount: number;
+    };
+    thisWeek: {
+        totalAmount: number;
+        transactionCount: number;
+    };
+    recentTransactions: StaffTransaction[];
+};
 
-const DUMMY_STAFF = [
-    { id: 1, name: 'Grace Achieng', email: 'grace@example.com',  status: 'active',      addedOn: '12 Jun' },
-    { id: 2, name: 'Brian Otieno',  email: 'brian@example.com',  status: 'active',      addedOn: '3 Jul'  },
-    { id: 3, name: 'Faith Mwangi',  email: 'faith@example.com',  status: 'deactivated', addedOn: '19 Apr' },
-] as const;
+const DUMMY_DATA: StaffDashboardProps = {
+    staffName: 'Faith',
+    shopName: 'Mama Faith Duka',
+    tillNumber: '4021990',
+    shiftStatus: 'active',
+    clockedInAt: '8:02 AM',
+    today: {
+        totalAmount: 18450,
+        transactionCount: 27,
+    },
+    thisWeek: {
+        totalAmount: 96200,
+        transactionCount: 142,
+    },
+    recentTransactions: [
+        { id: 1, mpesaReceipt: 'SGH4K9L2QX', amount: 1200, payerPhoneMasked: '•••• 214', time: '2:41 PM' },
+        { id: 2, mpesaReceipt: 'SGH4K9M7RT', amount: 350, payerPhoneMasked: '•••• 872', time: '2:22 PM' },
+        { id: 3, mpesaReceipt: 'SGH4K9J1WY', amount: 2500, payerPhoneMasked: '•••• 065', time: '1:58 PM' },
+        { id: 4, mpesaReceipt: 'SGH4K9H4NC', amount: 600, payerPhoneMasked: '•••• 431', time: '1:15 PM' },
+        { id: 5, mpesaReceipt: 'SGH4K9F0LD', amount: 150, payerPhoneMasked: '•••• 903', time: '12:47 PM' },
+        { id: 6, mpesaReceipt: 'SGH4K9D6BQ', amount: 4000, payerPhoneMasked: '•••• 558', time: '11:59 AM' },
+    ],
+};
 
-// pre-computed from DUMMY_TRANSACTIONS so the component never sums in JSX
-const DUMMY_TODAY   = DUMMY_TRANSACTIONS.filter(t => t.status === 'paid').reduce((s, t) => s + t.amount, 0);
-const DUMMY_YEST    = 35890;
-const DUMMY_WEEK    = 198450;
-const DUMMY_MONTH   = 812300;
-const DUMMY_COUNT   = DUMMY_TRANSACTIONS.filter(t => t.status === 'paid').length;
-const DUMMY_AVG     = Math.round(DUMMY_TODAY / DUMMY_COUNT);
-const DUMMY_FLAGGED = DUMMY_TRANSACTIONS.filter(t => t.status === 'flagged').length;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-function kes(n: number) {
-    return `KES ${n.toLocaleString('en-KE')}`;
+function formatKES(amount: number): string {
+    return `KSh ${amount.toLocaleString('en-KE')}`;
 }
 
-// ── icons ─────────────────────────────────────────────────────────────────────
-function TrendUpIcon()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>; }
-function TrendDownIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>; }
-function AlertIcon()     { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>; }
+const PHONE_PATTERN = /^(?:254|0)7\d{8}$/;
 
-// ── trend badge ───────────────────────────────────────────────────────────────
-function TrendBadge({ today, yesterday }: { today: number; yesterday: number }) {
-    if (!yesterday) return null;
-    const pct = Math.round(((today - yesterday) / yesterday) * 100);
-    const up  = pct >= 0;
-    return (
-        <span
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full mt-2"
-            style={{ fontFamily: K.mono, background: '#3A3A3C', color: K.gold }}
-        >
-            {up ? <TrendUpIcon /> : <TrendDownIcon />}
-            {up ? '+' : ''}{pct}% vs yesterday
-        </span>
-    );
-}
+type PromptStatus = 'idle' | 'sending' | 'sent' | 'error';
 
-// ── overview tab ──────────────────────────────────────────────────────────────
-function OverviewTab({
-    todayTotal, yesterdayTotal, weekTotal, monthTotal,
-    txnCount, avgSale, flagged, transactions,
-}: DashboardProps) {
-    return (
-        <div className="flex flex-col gap-5">
+function PromptClientDialog({
+    open,
+    onOpenChange,
+    tillNumber,
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    tillNumber: string;
+}) {
+    const [phone, setPhone] = useState('');
+    const [amount, setAmount] = useState('');
+    const [note, setNote] = useState('');
+    const [status, setStatus] = useState<PromptStatus>('idle');
+    const [error, setError] = useState<string | null>(null);
 
-            {/* hero card */}
-            <div
-                className="rounded-2xl px-6 py-5 flex justify-between items-center gap-4 flex-wrap"
-                style={{ background: K.hero }}
-            >
-                <div>
-                    <span
-                        className="text-[11px] uppercase tracking-widest font-bold block mb-1"
-                        style={{ fontFamily: K.mono, color: K.muted }}
-                    >
-                        Today's takings
-                    </span>
-                    <span
-                        className="text-4xl sm:text-5xl font-bold leading-none block"
-                        style={{ fontFamily: K.mono, color: K.gold }}
-                    >
-                        {kes(todayTotal)}
-                    </span>
-                    <TrendBadge today={todayTotal} yesterday={yesterdayTotal} />
-                </div>
-                <div className="flex gap-6 sm:gap-8">
-                    <div>
-                        <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ fontFamily: K.mono, color: K.muted }}>
-                            Receipts
-                        </span>
-                        <span className="text-2xl font-bold" style={{ fontFamily: K.mono, color: '#F5F5F5' }}>
-                            {txnCount}
-                        </span>
-                    </div>
-                    <div>
-                        <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ fontFamily: K.mono, color: K.muted }}>
-                            Average
-                        </span>
-                        <span className="text-2xl font-bold" style={{ fontFamily: K.mono, color: '#F5F5F5' }}>
-                            {kes(avgSale)}
-                        </span>
-                    </div>
-                </div>
-            </div>
+    const resetAndClose = () => {
+        onOpenChange(false);
 
-            {/* stat grid */}
-            <div className="grid grid-cols-2 gap-3">
-                <StatCard label="This week"  value={kes(weekTotal)}  icon={<TrendUpIcon />} />
-                <StatCard label="This month" value={kes(monthTotal)} icon={<TrendUpIcon />} />
-            </div>
-
-            {/* duplicate alert */}
-            {flagged > 0 && (
-                <div
-                    className="flex items-start gap-3 rounded-2xl px-4 py-3.5"
-                    style={{ background: K.dupBg }}
-                    role="alert"
-                >
-                    <span style={{ color: K.alertC, marginTop: 1 }}><AlertIcon /></span>
-                    <div>
-                        <p className="font-bold text-[13px]" style={{ color: K.dupC, fontFamily: K.display }}>
-                            {flagged} duplicate receipt{flagged > 1 ? 's' : ''} blocked
-                        </p>
-                        <p className="text-[12px] mt-0.5" style={{ fontFamily: K.mono, color: K.alertTxt }}>
-                            Callbacks rejected — your total is unaffected. Review below if needed.
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* recent receipts */}
-            <h2 style={{ fontFamily: K.display, color: K.ink }} className="font-extrabold text-[16px]">
-                Today's receipts
-            </h2>
-            <TransactionTable transactions={DUMMY_TRANSACTIONS} />
-        </div>
-    );
-}
-
-// ── page ──────────────────────────────────────────────────────────────────────
-export default function Dashboard({
-    shop         = DUMMY_SHOP,
-    todayTotal   = DUMMY_TODAY,
-    yesterdayTotal = DUMMY_YEST,
-    weekTotal    = DUMMY_WEEK,
-    monthTotal   = DUMMY_MONTH,
-    txnCount     = DUMMY_COUNT,
-    avgSale      = DUMMY_AVG,
-    flagged      = DUMMY_FLAGGED,
-    transactions = DUMMY_TRANSACTIONS as unknown as DashboardProps['transactions'],
-    staff        = DUMMY_STAFF as unknown as DashboardProps['staff'],
-}: Partial<DashboardProps>) {
-    const [tab, setTab] = useState<TabKey>('overview');
-     const {user}=useAuth();
-    const isOwner=user.role==='owner'
-
-    const props: DashboardProps = {
-        shop, todayTotal, yesterdayTotal, weekTotal, monthTotal,
-        txnCount, avgSale, flagged, transactions, staff, isOwner,
+        // Give the close animation a moment before wiping the form.
+        setTimeout(() => {
+            setPhone('');
+            setAmount('');
+            setNote('');
+            setStatus('idle');
+            setError(null);
+        }, 200);
     };
 
-   
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError(null);
 
+        const normalizedPhone = phone.replace(/\s+/g, '');
+        const parsedAmount = Number(amount);
+
+        if (!PHONE_PATTERN.test(normalizedPhone)) {
+            setError('Enter a valid Safaricom number, e.g. 0712 345 678.');
+
+            return;
+        }
+
+        if (!Number.isInteger(parsedAmount) || parsedAmount <= 0) {
+            setError('Enter a whole KES amount greater than 0.');
+
+            return;
+        }
+
+        setStatus('sending');
+
+        try {
+            const response = await fetch('/stk-push', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') ?? '',
+                },
+                body: JSON.stringify({ phone: normalizedPhone, amount: parsedAmount, note }),
+            });
+
+            if (!response.ok) {
+                const body = await response.json().catch(() => null);
+                setError(body?.message ?? 'Could not send the payment prompt. Please try again.');
+                setStatus('idle');
+
+                return;
+            }
+
+            const { id } = (await response.json()) as { id: number };
+
+            // Poll for the customer's response rather than trusting a
+            // client-side timer — the actual result only exists once
+            // Safaricom's callback has landed and been processed.
+            const finalStatus = await pollForResult(id);
+
+            if (finalStatus === 'success') {
+                setStatus('sent');
+                setTimeout(resetAndClose, 1800);
+            } else {
+                setError(
+                    finalStatus === 'failed'
+                        ? 'The customer declined or the prompt timed out.'
+                        : 'Still waiting on the customer — you can close this and check Recent transactions shortly.',
+                );
+                setStatus('idle');
+            }
+        } catch {
+            setError('Network error — please try again.');
+            setStatus('idle');
+        }
+    };
+
+    const pollForResult = async (id: number): Promise<'success' | 'failed' | 'pending'> => {
+        const maxAttempts = 15;
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            const res = await fetch(`/stk-push/${id}`, {
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!res.ok) {
+                continue;
+            }
+
+            const body = (await res.json()) as { status: 'pending' | 'success' | 'failed' };
+
+            if (body.status !== 'pending') {
+                return body.status;
+            }
+        }
+
+        return 'pending';
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={(next) => (!next ? resetAndClose() : onOpenChange(next))}>
+            <DialogContent className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-md">
+                {status === 'sent' ? (
+                    <div className="flex flex-col items-center gap-3 py-6 text-center">
+                        <div className="flex size-14 items-center justify-center rounded-full bg-emerald-500/10">
+                            <CheckCircle2 className="size-7 text-emerald-400" />
+                        </div>
+                        <DialogTitle className="text-white">Prompt sent</DialogTitle>
+                        <DialogDescription className="text-zinc-400">
+                            {phone} should see a Lipa na M-Pesa prompt for{' '}
+                            <span className="font-mono text-zinc-200">
+                                {formatKES(Number(amount) || 0)}
+                            </span>{' '}
+                            on their phone now.
+                        </DialogDescription>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <DialogHeader>
+                            <DialogTitle className="text-white">Prompt client to pay</DialogTitle>
+                            <DialogDescription className="text-zinc-400">
+                                Sends an STK push to the customer's phone for till{' '}
+                                <span className="font-mono text-zinc-300">{tillNumber}</span>. They
+                                confirm the payment on their own device.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="prompt-phone">Customer phone number</Label>
+                                <Input
+                                    id="prompt-phone"
+                                    inputMode="tel"
+                                    autoComplete="tel"
+                                    placeholder="0712 345 678"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    autoFocus
+                                    className="border-zinc-800 bg-zinc-900"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="prompt-amount">Amount (KES)</Label>
+                                <Input
+                                    id="prompt-amount"
+                                    inputMode="numeric"
+                                    placeholder="1500"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
+                                    className="border-zinc-800 bg-zinc-900 font-mono"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="prompt-note">
+                                    Note <span className="text-zinc-500">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="prompt-note"
+                                    placeholder="e.g. 2kg rice + cooking oil"
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                    className="border-zinc-800 bg-zinc-900"
+                                />
+                            </div>
+
+                            {error && <p className="text-sm text-red-400">{error}</p>}
+                        </div>
+
+                        <DialogFooter className="gap-2">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={resetAndClose}
+                                disabled={status === 'sending'}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={status === 'sending'}
+                                className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                            >
+                                {status === 'sending' ? <Spinner className="text-zinc-950" /> : <Send />}
+                                {status === 'sending' ? 'Sending prompt…' : 'Send prompt'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                )}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+export default function StaffDashboard(props: Partial<StaffDashboardProps> = {}) {
+    const data: StaffDashboardProps = { ...DUMMY_DATA, ...props };
+    const avgTicket = Math.round(data.thisWeek.totalAmount / Math.max(data.thisWeek.transactionCount, 1));
+    const [promptOpen, setPromptOpen] = useState(false);
 
     return (
         <>
+            <Head title="Today's Till" />
 
-        
-            <Seo title="Dashboard" description="Your daily M-Pesa reconciliation." noindex />
-
-            <div
-                className="min-h-screen antialiased"
-                style={{ background: K.bg, color: K.ink, fontFamily: K.body }}
-            >
-                <TopBar shop={shop} />
-                {isOwner && <TabNav active={tab} onChange={setTab} isOwner={isOwner} /> }
-                
-
-                <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-20">
-
-                    {tab === 'overview' && <OverviewTab {...props} />}
-
-                    {tab === 'transactions' && (
-                        <div className="flex flex-col gap-4">
-                            <h2 style={{ fontFamily: K.display, color: K.ink }} className="font-extrabold text-[16px]">
-                                All receipts today
-                            </h2>
-                            <TransactionTable transactions={DUMMY_TRANSACTIONS} />
+            <div className="min-h-svh bg-[#0a0a0a] font-[Nunito,sans-serif] text-zinc-100">
+                <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-6 pb-24 sm:max-w-2xl lg:max-w-6xl lg:px-8">
+                    {/* Header */}
+                    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <p className="text-sm text-zinc-500">Hi, {data.staffName}</p>
+                            <h1 className="font-[Baloo_2,sans-serif] text-2xl font-bold tracking-tight text-white lg:text-3xl">
+                                {data.shopName}
+                            </h1>
+                            <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500">
+                                <span>
+                                    Till <span className="font-mono text-zinc-400">{data.tillNumber}</span>
+                                </span>
+                                <span className="text-zinc-700">·</span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <span className="relative flex size-1.5">
+                                        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                        <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
+                                    </span>
+                                    <span className="text-emerald-400">On shift</span>
+                                </span>
+                            </div>
                         </div>
-                    )}
 
-                    {tab === 'staff' && isOwner && (
-                        <div className="flex flex-col gap-4">
-                            <h2 style={{ fontFamily: K.display, color: K.ink }} className="font-extrabold text-[16px]">
-                                Staff
-                            </h2>
-                            <StaffPanel staff={staff} />
+                        <Button
+                            onClick={() => setPromptOpen(true)}
+                            className="w-full gap-2 bg-emerald-500 text-zinc-950 hover:bg-emerald-400 sm:w-auto"
+                            size="lg"
+                        >
+                            <Smartphone className="size-4" />
+                            Prompt client
+                        </Button>
+                    </header>
+
+                    {/* Shift info strip */}
+                    <div className="flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-400">
+                        <Clock className="size-4 text-zinc-500" />
+                        Clocked in at <span className="font-medium text-zinc-200">{data.clockedInAt}</span>
+                    </div>
+
+                    {/* Hero total + secondary stats */}
+                    <div className="grid gap-4 lg:grid-cols-3">
+                        {/* Today's total — hero card */}
+                        <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-b from-emerald-950/50 to-zinc-900/60 p-6 lg:col-span-2 lg:flex lg:flex-col lg:justify-center">
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium text-emerald-300/80">Today's till</p>
+                                <Wallet className="size-5 text-emerald-400/70" />
+                            </div>
+                            <p className="mt-2 font-mono text-4xl font-bold tracking-tight text-white tabular-nums lg:text-5xl">
+                                {formatKES(data.today.totalAmount)}
+                            </p>
+                            <p className="mt-1 text-sm text-zinc-400">
+                                {data.today.transactionCount} transactions so far
+                            </p>
                         </div>
-                    )}
 
-                    {tab === 'shop' && (
-                        <div className="flex flex-col gap-4">
-                            <h2 style={{ fontFamily: K.display, color: K.ink }} className="font-extrabold text-[16px]">
-                                Shop
-                            </h2>
-                            <ShopPanel shop={shop} isOwner={isOwner} />
+                        {/* Secondary stats */}
+                        <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+                                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                                    <TrendingUp className="size-3.5" />
+                                    This week
+                                </div>
+                                <p className="mt-1.5 font-mono text-xl font-semibold text-white tabular-nums">
+                                    {formatKES(data.thisWeek.totalAmount)}
+                                </p>
+                                <p className="text-xs text-zinc-500">{data.thisWeek.transactionCount} sales</p>
+                            </div>
+                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+                                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                                    <Receipt className="size-3.5" />
+                                    Avg. ticket
+                                </div>
+                                <p className="mt-1.5 font-mono text-xl font-semibold text-white tabular-nums">
+                                    {formatKES(avgTicket)}
+                                </p>
+                                <p className="text-xs text-zinc-500">last 7 days</p>
+                            </div>
                         </div>
-                    )}
+                    </div>
 
-                </main>
+                    {/* Recent transactions */}
+                    <section className="mt-2">
+                        <div className="mb-2 flex items-center justify-between px-1">
+                            <h2 className="text-sm font-semibold text-zinc-300">Recent transactions</h2>
+                            <span className="text-xs text-zinc-500">{data.recentTransactions.length} shown</span>
+                        </div>
+
+                        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60">
+                            {data.recentTransactions.map((tx, index) => (
+                                <div
+                                    key={tx.id}
+                                    className={`flex items-center justify-between gap-3 px-4 py-3.5 lg:px-6 ${
+                                        index !== data.recentTransactions.length - 1
+                                            ? 'border-b border-zinc-800/70'
+                                            : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                                            <Wallet className="size-4 text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-zinc-200">
+                                                {tx.payerPhoneMasked}
+                                            </p>
+                                            <p className="font-mono text-xs text-zinc-500">
+                                                {tx.mpesaReceipt} · {tx.time}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <p className="font-mono text-sm font-semibold text-emerald-400 tabular-nums">
+                                        +{formatKES(tx.amount)}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* View-only notice */}
+                    <div className="mt-2 flex items-start gap-2.5 rounded-2xl border border-zinc-800/70 bg-zinc-900/30 px-4 py-3 text-xs text-zinc-500">
+                        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-zinc-600" />
+                        <p>
+                            You have view-only access to today's transactions. Staff management and shop
+                            settings are handled by your owner. Prompting a client only sends a payment
+                            request — it never edits totals directly.
+                        </p>
+                    </div>
+                </div>
             </div>
+
+            <PromptClientDialog
+                open={promptOpen}
+                onOpenChange={setPromptOpen}
+                tillNumber={data.tillNumber}
+            />
         </>
     );
 }
+
+StaffDashboard.layout = {
+    breadcrumbs: [
+        {
+            title: "Today's Till",
+            href: dashboard(),
+        },
+    ],
+};
