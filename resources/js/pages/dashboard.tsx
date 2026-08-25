@@ -1,471 +1,910 @@
-import { Head } from '@inertiajs/react';
-import {
-    CheckCircle2,
-    Clock,
-    Receipt,
-    Send,
-    ShieldCheck,
-    Smartphone,
-    TrendingUp,
-    Wallet,
-} from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { dashboard } from '@/routes';
 
-/**
- * Staff Dashboard — Kadogo
- *
- * View-only summary for shop staff, plus the ability to trigger an STK
- * push ("Prompt client") so a customer can complete a Lipa na M-Pesa
- * payment on their own phone. Per project rules, staff never see
- * management controls and never compute totals client-side — all figures
- * below are placeholder "server response" data shaped exactly like what
- * the real StaffDashboardController would return, so wiring this up later
- * is a drop-in prop swap.
- *
- * Money is treated as whole KES shillings (integers) throughout — never
- * floats — matching the project's monetary-handling rule.
- */
+import { Head, Link } from '@inertiajs/react';
 
-type StaffTransaction = {
+/*
+|--------------------------------------------------------------------------
+| Types
+|--------------------------------------------------------------------------
+*/
+
+type TransactionStatus =
+    | 'Matched'
+    | 'Pending'
+    | 'Unmatched'
+    | 'Failed';
+
+type Transaction = {
     id: number;
+    reference: string;
     mpesaReceipt: string;
+    phone: string;
+    employee: string;
+    till: string;
     amount: number;
-    payerPhoneMasked: string;
+    status: TransactionStatus;
     time: string;
 };
 
-type StaffDashboardProps = {
-    staffName: string;
+type Owner = {
+    name: string;
     shopName: string;
-    tillNumber: string;
-    shiftStatus: 'active' | 'ended';
-    clockedInAt: string;
-    today: {
-        totalAmount: number;
-        transactionCount: number;
-    };
-    thisWeek: {
-        totalAmount: number;
-        transactionCount: number;
-    };
-    recentTransactions: StaffTransaction[];
+    role: string;
 };
 
-const DUMMY_DATA: StaffDashboardProps = {
-    staffName: 'Faith',
-    shopName: 'Mama Faith Duka',
-    tillNumber: '4021990',
-    shiftStatus: 'active',
-    clockedInAt: '8:02 AM',
-    today: {
-        totalAmount: 18450,
-        transactionCount: 27,
-    },
-    thisWeek: {
-        totalAmount: 96200,
-        transactionCount: 142,
-    },
-    recentTransactions: [
-        { id: 1, mpesaReceipt: 'SGH4K9L2QX', amount: 1200, payerPhoneMasked: '•••• 214', time: '2:41 PM' },
-        { id: 2, mpesaReceipt: 'SGH4K9M7RT', amount: 350, payerPhoneMasked: '•••• 872', time: '2:22 PM' },
-        { id: 3, mpesaReceipt: 'SGH4K9J1WY', amount: 2500, payerPhoneMasked: '•••• 065', time: '1:58 PM' },
-        { id: 4, mpesaReceipt: 'SGH4K9H4NC', amount: 600, payerPhoneMasked: '•••• 431', time: '1:15 PM' },
-        { id: 5, mpesaReceipt: 'SGH4K9F0LD', amount: 150, payerPhoneMasked: '•••• 903', time: '12:47 PM' },
-        { id: 6, mpesaReceipt: 'SGH4K9D6BQ', amount: 4000, payerPhoneMasked: '•••• 558', time: '11:59 AM' },
-    ],
+type DashboardStats = {
+    todayCollections: number;
+    reconciledAmount: number;
+    pendingAmount: number;
+    exceptions: number;
+    totalTransactions: number;
+    matchedTransactions: number;
 };
 
-function formatKES(amount: number): string {
-    return `KSh ${amount.toLocaleString('en-KE')}`;
+/*
+|--------------------------------------------------------------------------
+| Dummy Data
+|--------------------------------------------------------------------------
+|
+| Authentication has not been implemented yet, so the owner/shop data
+| is intentionally kept here for development.
+|
+*/
+
+const owner: Owner = {
+    name: 'Ian Kamau',
+    shopName: 'Kadogo Shop',
+    role: 'Owner',
+};
+
+const stats: DashboardStats = {
+    todayCollections: 45600,
+    reconciledAmount: 41200,
+    pendingAmount: 2400,
+    exceptions: 7,
+    totalTransactions: 128,
+    matchedTransactions: 116,
+};
+
+const transactions: Transaction[] = [
+    {
+        id: 1,
+        reference: 'TXN-1001',
+        mpesaReceipt: 'QGH7A8B9C1',
+        phone: '0712 456 789',
+        employee: 'Mary Wanjiku',
+        till: 'Till 01',
+        amount: 1200,
+        status: 'Matched',
+        time: '10:42 AM',
+    },
+    {
+        id: 2,
+        reference: 'TXN-1002',
+        mpesaReceipt: 'QGH7A8B9C2',
+        phone: '0721 345 678',
+        employee: 'Peter Kamau',
+        till: 'Till 02',
+        amount: 850,
+        status: 'Matched',
+        time: '10:35 AM',
+    },
+    {
+        id: 3,
+        reference: 'TXN-1003',
+        mpesaReceipt: 'QGH7A8B9C3',
+        phone: '0708 234 567',
+        employee: 'John Mwangi',
+        till: 'Till 01',
+        amount: 2400,
+        status: 'Pending',
+        time: '10:21 AM',
+    },
+    {
+        id: 4,
+        reference: 'TXN-1004',
+        mpesaReceipt: 'QGH7A8B9C4',
+        phone: '0798 456 123',
+        employee: 'Mary Wanjiku',
+        till: 'Till 03',
+        amount: 500,
+        status: 'Matched',
+        time: '09:58 AM',
+    },
+    {
+        id: 5,
+        reference: 'TXN-1005',
+        mpesaReceipt: 'QGH7A8B9C5',
+        phone: '0715 987 654',
+        employee: 'Peter Kamau',
+        till: 'Till 02',
+        amount: 1750,
+        status: 'Unmatched',
+        time: '09:41 AM',
+    },
+];
+
+const shop = {
+    name: 'Kadogo Shop',
+    till: 'Till 01',
+    location: 'Nyeri, Kenya',
+    phone: '0712 456 789',
+};
+
+/*
+|--------------------------------------------------------------------------
+| Helpers
+|--------------------------------------------------------------------------
+*/
+
+function formatKES(amount: number) {
+    return `KES ${amount.toLocaleString('en-KE')}`;
 }
 
-const PHONE_PATTERN = /^(?:254|0)7\d{8}$/;
-
-type PromptStatus = 'idle' | 'sending' | 'sent' | 'error';
-
-function PromptClientDialog({
-    open,
-    onOpenChange,
-    tillNumber,
-}: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    tillNumber: string;
-}) {
-    const [phone, setPhone] = useState('');
-    const [amount, setAmount] = useState('');
-    const [note, setNote] = useState('');
-    const [status, setStatus] = useState<PromptStatus>('idle');
-    const [error, setError] = useState<string | null>(null);
-
-    const resetAndClose = () => {
-        onOpenChange(false);
-
-        // Give the close animation a moment before wiping the form.
-        setTimeout(() => {
-            setPhone('');
-            setAmount('');
-            setNote('');
-            setStatus('idle');
-            setError(null);
-        }, 200);
-    };
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setError(null);
-
-        const normalizedPhone = phone.replace(/\s+/g, '');
-        const parsedAmount = Number(amount);
-
-        if (!PHONE_PATTERN.test(normalizedPhone)) {
-            setError('Enter a valid Safaricom number, e.g. 0712 345 678.');
-
-            return;
-        }
-
-        if (!Number.isInteger(parsedAmount) || parsedAmount <= 0) {
-            setError('Enter a whole KES amount greater than 0.');
-
-            return;
-        }
-
-        setStatus('sending');
-
-        try {
-            const response = await fetch('/stk-push', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN':
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            ?.getAttribute('content') ?? '',
-                },
-                body: JSON.stringify({ phone: normalizedPhone, amount: parsedAmount, note }),
-            });
-
-            if (!response.ok) {
-                const body = await response.json().catch(() => null);
-                setError(body?.message ?? 'Could not send the payment prompt. Please try again.');
-                setStatus('idle');
-
-                return;
-            }
-
-            const { id } = (await response.json()) as { id: number };
-
-            // Poll for the customer's response rather than trusting a
-            // client-side timer — the actual result only exists once
-            // Safaricom's callback has landed and been processed.
-            const finalStatus = await pollForResult(id);
-
-            if (finalStatus === 'success') {
-                setStatus('sent');
-                setTimeout(resetAndClose, 1800);
-            } else {
-                setError(
-                    finalStatus === 'failed'
-                        ? 'The customer declined or the prompt timed out.'
-                        : 'Still waiting on the customer — you can close this and check Recent transactions shortly.',
-                );
-                setStatus('idle');
-            }
-        } catch {
-            setError('Network error — please try again.');
-            setStatus('idle');
-        }
-    };
-
-    const pollForResult = async (id: number): Promise<'success' | 'failed' | 'pending'> => {
-        const maxAttempts = 15;
-
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            const res = await fetch(`/stk-push/${id}`, {
-                headers: { Accept: 'application/json' },
-            });
-
-            if (!res.ok) {
-                continue;
-            }
-
-            const body = (await res.json()) as { status: 'pending' | 'success' | 'failed' };
-
-            if (body.status !== 'pending') {
-                return body.status;
-            }
-        }
-
-        return 'pending';
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={(next) => (!next ? resetAndClose() : onOpenChange(next))}>
-            <DialogContent className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-md">
-                {status === 'sent' ? (
-                    <div className="flex flex-col items-center gap-3 py-6 text-center">
-                        <div className="flex size-14 items-center justify-center rounded-full bg-emerald-500/10">
-                            <CheckCircle2 className="size-7 text-emerald-400" />
-                        </div>
-                        <DialogTitle className="text-white">Prompt sent</DialogTitle>
-                        <DialogDescription className="text-zinc-400">
-                            {phone} should see a Lipa na M-Pesa prompt for{' '}
-                            <span className="font-mono text-zinc-200">
-                                {formatKES(Number(amount) || 0)}
-                            </span>{' '}
-                            on their phone now.
-                        </DialogDescription>
-                    </div>
-                ) : (
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Prompt client to pay</DialogTitle>
-                            <DialogDescription className="text-zinc-400">
-                                Sends an STK push to the customer's phone for till{' '}
-                                <span className="font-mono text-zinc-300">{tillNumber}</span>. They
-                                confirm the payment on their own device.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <div className="space-y-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="prompt-phone">Customer phone number</Label>
-                                <Input
-                                    id="prompt-phone"
-                                    inputMode="tel"
-                                    autoComplete="tel"
-                                    placeholder="0712 345 678"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    autoFocus
-                                    className="border-zinc-800 bg-zinc-900"
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="prompt-amount">Amount (KES)</Label>
-                                <Input
-                                    id="prompt-amount"
-                                    inputMode="numeric"
-                                    placeholder="1500"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                                    className="border-zinc-800 bg-zinc-900 font-mono"
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="prompt-note">
-                                    Note <span className="text-zinc-500">(optional)</span>
-                                </Label>
-                                <Input
-                                    id="prompt-note"
-                                    placeholder="e.g. 2kg rice + cooking oil"
-                                    value={note}
-                                    onChange={(e) => setNote(e.target.value)}
-                                    className="border-zinc-800 bg-zinc-900"
-                                />
-                            </div>
-
-                            {error && <p className="text-sm text-red-400">{error}</p>}
-                        </div>
-
-                        <DialogFooter className="gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={resetAndClose}
-                                disabled={status === 'sending'}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={status === 'sending'}
-                                className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
-                            >
-                                {status === 'sending' ? <Spinner className="text-zinc-950" /> : <Send />}
-                                {status === 'sending' ? 'Sending prompt…' : 'Send prompt'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                )}
-            </DialogContent>
-        </Dialog>
-    );
+function getInitials(name: string) {
+    return name
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
 }
 
-export default function StaffDashboard(props: Partial<StaffDashboardProps> = {}) {
-    const data: StaffDashboardProps = { ...DUMMY_DATA, ...props };
-    const avgTicket = Math.round(data.thisWeek.totalAmount / Math.max(data.thisWeek.transactionCount, 1));
-    const [promptOpen, setPromptOpen] = useState(false);
+/*
+|--------------------------------------------------------------------------
+| Dashboard
+|--------------------------------------------------------------------------
+*/
+
+export default function Dashboard() {
+    const reconciliationRate =
+        stats.totalTransactions > 0
+            ? Math.round(
+                  (stats.matchedTransactions / stats.totalTransactions) * 100,
+              )
+            : 0;
 
     return (
         <>
-            <Head title="Today's Till" />
+            <Head title="Owner Dashboard" />
 
-            <div className="min-h-svh bg-[#0a0a0a] font-[Nunito,sans-serif] text-zinc-100">
-                <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-6 pb-24 sm:max-w-2xl lg:max-w-6xl lg:px-8">
-                    {/* Header */}
-                    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <p className="text-sm text-zinc-500">Hi, {data.staffName}</p>
-                            <h1 className="font-[Baloo_2,sans-serif] text-2xl font-bold tracking-tight text-white lg:text-3xl">
-                                {data.shopName}
-                            </h1>
-                            <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500">
-                                <span>
-                                    Till <span className="font-mono text-zinc-400">{data.tillNumber}</span>
-                                </span>
-                                <span className="text-zinc-700">·</span>
-                                <span className="inline-flex items-center gap-1.5">
-                                    <span className="relative flex size-1.5">
-                                        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                                        <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-                                    </span>
-                                    <span className="text-emerald-400">On shift</span>
-                                </span>
+            <div className="min-h-screen bg-[#FFF4DA] text-[#2B2B2B]">
+                <div className="flex min-h-screen">
+
+                    {/* ======================================================
+                        SIDEBAR
+                    ====================================================== */}
+
+                    <aside className="hidden w-64 shrink-0 border-r border-[#E6DAB8] bg-[#FFFBF2] lg:flex lg:flex-col">
+
+                        {/* Logo */}
+                        <div className="px-6 pb-8 pt-7">
+                            <div className="text-2xl font-bold tracking-tight">
+                                kadogo
                             </div>
-                        </div>
 
-                        <Button
-                            onClick={() => setPromptOpen(true)}
-                            className="w-full gap-2 bg-emerald-500 text-zinc-950 hover:bg-emerald-400 sm:w-auto"
-                            size="lg"
-                        >
-                            <Smartphone className="size-4" />
-                            Prompt client
-                        </Button>
-                    </header>
-
-                    {/* Shift info strip */}
-                    <div className="flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-400">
-                        <Clock className="size-4 text-zinc-500" />
-                        Clocked in at <span className="font-medium text-zinc-200">{data.clockedInAt}</span>
-                    </div>
-
-                    {/* Hero total + secondary stats */}
-                    <div className="grid gap-4 lg:grid-cols-3">
-                        {/* Today's total — hero card */}
-                        <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-b from-emerald-950/50 to-zinc-900/60 p-6 lg:col-span-2 lg:flex lg:flex-col lg:justify-center">
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-emerald-300/80">Today's till</p>
-                                <Wallet className="size-5 text-emerald-400/70" />
-                            </div>
-                            <p className="mt-2 font-mono text-4xl font-bold tracking-tight text-white tabular-nums lg:text-5xl">
-                                {formatKES(data.today.totalAmount)}
-                            </p>
-                            <p className="mt-1 text-sm text-zinc-400">
-                                {data.today.transactionCount} transactions so far
+                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A8578]">
+                                M-Pesa Reconciliation
                             </p>
                         </div>
 
-                        {/* Secondary stats */}
-                        <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-                                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-                                    <TrendingUp className="size-3.5" />
-                                    This week
-                                </div>
-                                <p className="mt-1.5 font-mono text-xl font-semibold text-white tabular-nums">
-                                    {formatKES(data.thisWeek.totalAmount)}
-                                </p>
-                                <p className="text-xs text-zinc-500">{data.thisWeek.transactionCount} sales</p>
-                            </div>
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-                                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-                                    <Receipt className="size-3.5" />
-                                    Avg. ticket
-                                </div>
-                                <p className="mt-1.5 font-mono text-xl font-semibold text-white tabular-nums">
-                                    {formatKES(avgTicket)}
-                                </p>
-                                <p className="text-xs text-zinc-500">last 7 days</p>
-                            </div>
-                        </div>
-                    </div>
+                        {/* Navigation */}
+                        <nav className="flex-1 px-4">
 
-                    {/* Recent transactions */}
-                    <section className="mt-2">
-                        <div className="mb-2 flex items-center justify-between px-1">
-                            <h2 className="text-sm font-semibold text-zinc-300">Recent transactions</h2>
-                            <span className="text-xs text-zinc-500">{data.recentTransactions.length} shown</span>
-                        </div>
+                            <NavItem
+                                label="Dashboard"
+                                href="/owner/dashboard"
+                                active
+                            />
 
-                        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60">
-                            {data.recentTransactions.map((tx, index) => (
-                                <div
-                                    key={tx.id}
-                                    className={`flex items-center justify-between gap-3 px-4 py-3.5 lg:px-6 ${
-                                        index !== data.recentTransactions.length - 1
-                                            ? 'border-b border-zinc-800/70'
-                                            : ''
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                                            <Wallet className="size-4 text-emerald-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-zinc-200">
-                                                {tx.payerPhoneMasked}
-                                            </p>
-                                            <p className="font-mono text-xs text-zinc-500">
-                                                {tx.mpesaReceipt} · {tx.time}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <p className="font-mono text-sm font-semibold text-emerald-400 tabular-nums">
-                                        +{formatKES(tx.amount)}
+                            <NavItem
+                                label="Transactions"
+                                href="/owner/transactions"
+                            />
+
+                            <NavItem
+                                label="Reconciliation"
+                                href="/owner/reconciliation"
+                            />
+
+                            <div className="pb-2 pt-7">
+                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8578]">
+                                    Shop
+                                </p>
+                            </div>
+
+                            <NavItem
+                                label="Shop"
+                                href="/owner/shop"
+                            />
+
+                            <NavItem
+                                label="Profile"
+                                href="/owner/profile"
+                            />
+
+                            <div className="pb-2 pt-7">
+                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8578]">
+                                    Management
+                                </p>
+                            </div>
+
+                            <NavItem
+                                label="Employees"
+                                href="/owner/employees"
+                            />
+
+                            <NavItem
+                                label="Tills"
+                                href="/owner/tills"
+                            />
+
+                        </nav>
+
+                        {/* Owner */}
+                        <div className="border-t border-[#E6DAB8] p-5">
+
+                            <div className="flex items-center gap-3">
+
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4E7D67] text-sm font-bold text-white">
+                                    {getInitials(owner.name)}
+                                </div>
+
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-bold">
+                                        {owner.name}
+                                    </p>
+
+                                    <p className="text-xs text-[#8A8578]">
+                                        {owner.role}
                                     </p>
                                 </div>
-                            ))}
-                        </div>
-                    </section>
 
-                    {/* View-only notice */}
-                    <div className="mt-2 flex items-start gap-2.5 rounded-2xl border border-zinc-800/70 bg-zinc-900/30 px-4 py-3 text-xs text-zinc-500">
-                        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-zinc-600" />
-                        <p>
-                            You have view-only access to today's transactions. Staff management and shop
-                            settings are handled by your owner. Prompting a client only sends a payment
-                            request — it never edits totals directly.
-                        </p>
-                    </div>
+                            </div>
+
+                        </div>
+
+                    </aside>
+
+                    {/* ======================================================
+                        MAIN
+                    ====================================================== */}
+
+                    <main className="min-w-0 flex-1">
+
+                        {/* Header */}
+                        <header className="border-b border-[#E6DAB8] bg-[#FFFBF2] px-5 py-5 sm:px-6 lg:px-10">
+
+                            <div className="flex items-center justify-between gap-5">
+
+                                <div className="min-w-0">
+
+                                    <p className="truncate text-xs font-semibold text-[#8A8578]">
+                                        {owner.shopName}
+                                    </p>
+
+                                    <h1 className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">
+                                        Good morning, {owner.name.split(' ')[0]}
+                                    </h1>
+
+                                    <p className="mt-1 hidden text-sm text-[#8A8578] sm:block">
+                                        Here's your M-Pesa reconciliation overview.
+                                    </p>
+
+                                </div>
+
+                                <div className="hidden text-right sm:block">
+
+                                    <p className="text-sm font-semibold">
+                                        Saturday, 22 August
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-[#8A8578]">
+                                        Owner account
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </header>
+
+                        {/* Content */}
+                        <div className="p-5 sm:p-6 lg:p-10">
+
+                            {/* ==================================================
+                                OVERVIEW
+                            ================================================== */}
+
+                            <section>
+
+                                <div className="mb-5">
+                                    <h2 className="text-base font-bold">
+                                        Today's overview
+                                    </h2>
+
+                                    <p className="mt-1 text-xs text-[#8A8578]">
+                                        Monitor collections and reconciliation activity.
+                                    </p>
+                                </div>
+
+                                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+                                    <StatCard
+                                        label="Today's Collections"
+                                        value={formatKES(stats.todayCollections)}
+                                        description="Total M-Pesa received"
+                                        accent="green"
+                                    />
+
+                                    <StatCard
+                                        label="Reconciled"
+                                        value={formatKES(stats.reconciledAmount)}
+                                        description={`${reconciliationRate}% successfully matched`}
+                                        accent="green"
+                                    />
+
+                                    <StatCard
+                                        label="Pending"
+                                        value={formatKES(stats.pendingAmount)}
+                                        description="Awaiting reconciliation"
+                                        accent="yellow"
+                                    />
+
+                                    <StatCard
+                                        label="Exceptions"
+                                        value={stats.exceptions.toString()}
+                                        description="Transactions need attention"
+                                        accent="red"
+                                    />
+
+                                </div>
+
+                            </section>
+
+                            {/* ==================================================
+                                MAIN GRID
+                            ================================================== */}
+
+                            <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+
+                                {/* ==================================================
+                                    TRANSACTIONS
+                                ================================================== */}
+
+                                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2]">
+
+                                    <div className="flex items-center justify-between gap-4 border-b border-[#E6DAB8] px-5 py-5">
+
+                                        <div>
+                                            <h2 className="font-bold">
+                                                Recent Transactions
+                                            </h2>
+
+                                            <p className="mt-1 text-xs text-[#8A8578]">
+                                                Latest M-Pesa activity from your shop
+                                            </p>
+                                        </div>
+
+                                        <Link
+                                            href="/owner/transactions"
+                                            className="shrink-0 text-sm font-bold text-[#4E7D67] hover:text-[#355B49]"
+                                        >
+                                            View all
+                                        </Link>
+
+                                    </div>
+
+                                    {/* Table header */}
+                                    <div className="hidden grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] border-b border-[#E6DAB8] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[#8A8578] md:grid">
+
+                                        <span>Reference</span>
+                                        <span>Customer</span>
+                                        <span>Till</span>
+                                        <span>Amount</span>
+                                        <span>Status</span>
+
+                                    </div>
+
+                                    {/* Rows */}
+                                    <div className="divide-y divide-[#E6DAB8]">
+
+                                        {transactions.map((transaction) => (
+                                            <TransactionRow
+                                                key={transaction.id}
+                                                transaction={transaction}
+                                            />
+                                        ))}
+
+                                    </div>
+
+                                </section>
+
+                                {/* ==================================================
+                                    RECONCILIATION SUMMARY
+                                ================================================== */}
+
+                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+
+                                    <div>
+                                        <h2 className="font-bold">
+                                            Reconciliation
+                                        </h2>
+
+                                        <p className="mt-1 text-xs text-[#8A8578]">
+                                            Today's transaction status
+                                        </p>
+                                    </div>
+
+                                    {/* Progress */}
+                                    <div className="mt-7">
+
+                                        <div className="flex items-end justify-between">
+
+                                            <div>
+                                                <p className="font-mono text-3xl font-bold">
+                                                    {reconciliationRate}%
+                                                </p>
+
+                                                <p className="mt-1 text-xs text-[#8A8578]">
+                                                    Reconciled
+                                                </p>
+                                            </div>
+
+                                            <p className="text-xs font-semibold text-[#4E7D67]">
+                                                {stats.matchedTransactions} / {stats.totalTransactions}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E6DAB8]">
+
+                                            <div
+                                                className="h-full rounded-full bg-[#4E7D67] transition-all"
+                                                style={{
+                                                    width: `${reconciliationRate}%`,
+                                                }}
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* Status breakdown */}
+                                    <div className="mt-7 space-y-4">
+
+                                        <StatusSummary
+                                            label="Matched"
+                                            value={stats.matchedTransactions}
+                                            total={stats.totalTransactions}
+                                            type="matched"
+                                        />
+
+                                        <StatusSummary
+                                            label="Pending"
+                                            value={12}
+                                            total={stats.totalTransactions}
+                                            type="pending"
+                                        />
+
+                                        <StatusSummary
+                                            label="Exceptions"
+                                            value={stats.exceptions}
+                                            total={stats.totalTransactions}
+                                            type="exception"
+                                        />
+
+                                    </div>
+
+                                    <Link
+                                        href="/owner/reconciliation"
+                                        className="mt-7 block rounded-xl bg-[#4E7D67] px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-[#3D6855]"
+                                    >
+                                        Review reconciliation
+                                    </Link>
+
+                                </section>
+
+                            </div>
+
+                            {/* ==================================================
+                                BOTTOM GRID
+                            ================================================== */}
+
+                            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+
+                                {/* Shop */}
+                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+
+                                    <div className="flex items-start justify-between gap-4">
+
+                                        <div>
+                                            <h2 className="font-bold">
+                                                Shop profile
+                                            </h2>
+
+                                            <p className="mt-1 text-xs text-[#8A8578]">
+                                                Your business information
+                                            </p>
+                                        </div>
+
+                                        <Link
+                                            href="/owner/shop"
+                                            className="text-sm font-bold text-[#4E7D67]"
+                                        >
+                                            Manage
+                                        </Link>
+
+                                    </div>
+
+                                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            label="Business"
+                                            value={shop.name}
+                                        />
+
+                                        <InfoItem
+                                            label="Till"
+                                            value={shop.till}
+                                        />
+
+                                        <InfoItem
+                                            label="Location"
+                                            value={shop.location}
+                                        />
+
+                                        <InfoItem
+                                            label="Phone"
+                                            value={shop.phone}
+                                        />
+
+                                    </div>
+
+                                </section>
+
+                                {/* Quick Actions */}
+                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+
+                                    <div>
+                                        <h2 className="font-bold">
+                                            Quick actions
+                                        </h2>
+
+                                        <p className="mt-1 text-xs text-[#8A8578]">
+                                            Common tasks for your shop
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+
+                                        <QuickAction
+                                            title="View transactions"
+                                            description="Search M-Pesa activity"
+                                            href="/owner/transactions"
+                                        />
+
+                                        <QuickAction
+                                            title="Reconcile"
+                                            description="Review unmatched payments"
+                                            href="/owner/reconciliation"
+                                        />
+
+                                        <QuickAction
+                                            title="Manage shop"
+                                            description="Update business details"
+                                            href="/owner/shop"
+                                        />
+
+                                        <QuickAction
+                                            title="View profile"
+                                            description="Manage your account"
+                                            href="/owner/profile"
+                                        />
+
+                                    </div>
+
+                                </section>
+
+                            </div>
+
+                        </div>
+
+                    </main>
+
                 </div>
             </div>
-
-            <PromptClientDialog
-                open={promptOpen}
-                onOpenChange={setPromptOpen}
-                tillNumber={data.tillNumber}
-            />
         </>
     );
 }
 
-StaffDashboard.layout = {
-    breadcrumbs: [
-        {
-            title: "Today's Till",
-            href: dashboard(),
-        },
-    ],
+/*
+|--------------------------------------------------------------------------
+| Navigation Item
+|--------------------------------------------------------------------------
+*/
+
+type NavItemProps = {
+    label: string;
+    href: string;
+    active?: boolean;
 };
+
+function NavItem({
+    label,
+    href,
+    active = false,
+}: NavItemProps) {
+    return (
+        <Link
+            href={href}
+            className={[
+                'mb-1 block rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+                active
+                    ? 'bg-[#4E7D67] text-white'
+                    : 'text-[#2B2B2B] hover:bg-[#FFF4DA]',
+            ].join(' ')}
+        >
+            {label}
+        </Link>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Stat Card
+|--------------------------------------------------------------------------
+*/
+
+type StatCardProps = {
+    label: string;
+    value: string;
+    description: string;
+    accent: 'green' | 'yellow' | 'red';
+};
+
+function StatCard({
+    label,
+    value,
+    description,
+    accent,
+}: StatCardProps) {
+
+    const accentStyles = {
+        green: 'bg-[#4E7D67]',
+        yellow: 'bg-[#F2B84B]',
+        red: 'bg-[#E85D5D]',
+    };
+
+    return (
+        <div className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+
+            <div className="flex items-center justify-between gap-3">
+
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#8A8578]">
+                    {label}
+                </p>
+
+                <span
+                    className={`h-2 w-2 rounded-full ${accentStyles[accent]}`}
+                />
+
+            </div>
+
+            <p className="mt-4 font-mono text-2xl font-bold tracking-tight">
+                {value}
+            </p>
+
+            <p className="mt-2 text-xs text-[#8A8578]">
+                {description}
+            </p>
+
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Transaction Row
+|--------------------------------------------------------------------------
+*/
+
+type TransactionRowProps = {
+    transaction: Transaction;
+};
+
+function TransactionRow({
+    transaction,
+}: TransactionRowProps) {
+
+    const statusClass = {
+        Matched: 'bg-[#4E7D67]/10 text-[#4E7D67]',
+        Pending: 'bg-[#F2B84B]/20 text-[#8A6500]',
+        Unmatched: 'bg-[#E85D5D]/10 text-[#C44747]',
+        Failed: 'bg-[#E85D5D]/10 text-[#C44747]',
+    }[transaction.status];
+
+    return (
+        <div className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] md:items-center">
+
+            <div>
+                <p className="font-mono text-sm font-semibold">
+                    {transaction.reference}
+                </p>
+
+                <p className="mt-1 text-[11px] text-[#8A8578]">
+                    {transaction.mpesaReceipt}
+                </p>
+            </div>
+
+            <div className="text-sm">
+
+                <p>
+                    {transaction.phone}
+                </p>
+
+                <p className="mt-1 text-[11px] text-[#8A8578]">
+                    {transaction.time}
+                </p>
+
+            </div>
+
+            <div className="text-sm text-[#8A8578]">
+                {transaction.till}
+            </div>
+
+            <div className="font-mono text-sm font-semibold">
+                {formatKES(transaction.amount)}
+            </div>
+
+            <div>
+                <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${statusClass}`}
+                >
+                    {transaction.status}
+                </span>
+            </div>
+
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Status Summary
+|--------------------------------------------------------------------------
+*/
+
+type StatusSummaryProps = {
+    label: string;
+    value: number;
+    total: number;
+    type: 'matched' | 'pending' | 'exception';
+};
+
+function StatusSummary({
+    label,
+    value,
+    total,
+    type,
+}: StatusSummaryProps) {
+
+    const percentage =
+        total > 0
+            ? Math.round((value / total) * 100)
+            : 0;
+
+    const dotClass = {
+        matched: 'bg-[#4E7D67]',
+        pending: 'bg-[#F2B84B]',
+        exception: 'bg-[#E85D5D]',
+    }[type];
+
+    return (
+        <div>
+
+            <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-2">
+
+                    <span
+                        className={`h-2 w-2 rounded-full ${dotClass}`}
+                    />
+
+                    <span className="text-sm font-semibold">
+                        {label}
+                    </span>
+
+                </div>
+
+                <span className="font-mono text-xs text-[#8A8578]">
+                    {value}
+                </span>
+
+            </div>
+
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E6DAB8]">
+
+                <div
+                    className={`h-full rounded-full ${dotClass}`}
+                    style={{
+                        width: `${Math.min(percentage, 100)}%`,
+                    }}
+                />
+
+            </div>
+
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Information Item
+|--------------------------------------------------------------------------
+*/
+
+type InfoItemProps = {
+    label: string;
+    value: string;
+};
+
+function InfoItem({
+    label,
+    value,
+}: InfoItemProps) {
+    return (
+        <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8A8578]">
+                {label}
+            </p>
+
+            <p className="mt-1 text-sm font-semibold">
+                {value}
+            </p>
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Quick Action
+|--------------------------------------------------------------------------
+*/
+
+type QuickActionProps = {
+    title: string;
+    description: string;
+    href: string;
+};
+
+function QuickAction({
+    title,
+    description,
+    href,
+}: QuickActionProps) {
+    return (
+        <Link
+            href={href}
+            className="group rounded-xl border border-[#E6DAB8] p-4 transition hover:border-[#4E7D67] hover:bg-[#FFF4DA]"
+        >
+            <div className="flex items-center justify-between gap-3">
+
+                <div>
+                    <p className="text-sm font-bold">
+                        {title}
+                    </p>
+
+                    <p className="mt-1 text-xs text-[#8A8578]">
+                        {description}
+                    </p>
+                </div>
+
+                <span className="text-lg text-[#8A8578] transition group-hover:translate-x-0.5 group-hover:text-[#4E7D67]">
+                    →
+                </span>
+
+            </div>
+        </Link>
+    );
+}
+
