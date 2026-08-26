@@ -1,11 +1,4 @@
-
 import { Head, Link } from '@inertiajs/react';
-
-/*
-|--------------------------------------------------------------------------
-| Types
-|--------------------------------------------------------------------------
-*/
 
 type TransactionStatus =
     | 'Matched'
@@ -40,15 +33,6 @@ type DashboardStats = {
     matchedTransactions: number;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Dummy Data
-|--------------------------------------------------------------------------
-|
-| Authentication has not been implemented yet, so the owner/shop data
-| is intentionally kept here for development.
-|
-*/
 
 const owner: Owner = {
     name: 'Ian Kamau',
@@ -149,11 +133,6 @@ function getInitials(name: string) {
         .toUpperCase();
 }
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard
-|--------------------------------------------------------------------------
-*/
 
 export default function Dashboard() {
     const reconciliationRate =
@@ -167,22 +146,25 @@ export default function Dashboard() {
         <>
             <Head title="Owner Dashboard" />
 
-            <div className="min-h-screen bg-[#FFF4DA] text-[#2B2B2B]">
+            <div className="min-h-screen bg-[#101010] text-[#F5F5F5] [font-family:'Inter',ui-sans-serif,sans-serif]">
                 <div className="flex min-h-screen">
 
                     {/* ======================================================
                         SIDEBAR
                     ====================================================== */}
 
-                    <aside className="hidden w-64 shrink-0 border-r border-[#E6DAB8] bg-[#FFFBF2] lg:flex lg:flex-col">
+                    <aside className="hidden w-64 shrink-0 border-r border-[#353538] bg-[#1B1B1D] lg:flex lg:flex-col">
 
                         {/* Logo */}
                         <div className="px-6 pb-8 pt-7">
-                            <div className="text-2xl font-bold tracking-tight">
+                            <div
+                                className="text-2xl font-bold tracking-tight text-[#F5F5F5]"
+                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                            >
                                 kadogo
                             </div>
 
-                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A8578]">
+                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#A7A7AB]">
                                 M-Pesa Reconciliation
                             </p>
                         </div>
@@ -207,7 +189,7 @@ export default function Dashboard() {
                             />
 
                             <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8578]">
+                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
                                     Shop
                                 </p>
                             </div>
@@ -223,7 +205,7 @@ export default function Dashboard() {
                             />
 
                             <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8578]">
+                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
                                     Management
                                 </p>
                             </div>
@@ -241,20 +223,20 @@ export default function Dashboard() {
                         </nav>
 
                         {/* Owner */}
-                        <div className="border-t border-[#E6DAB8] p-5">
+                        <div className="border-t border-[#353538] p-5">
 
                             <div className="flex items-center gap-3">
 
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4E7D67] text-sm font-bold text-white">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#43B47E] text-sm font-bold text-[#101010]">
                                     {getInitials(owner.name)}
                                 </div>
 
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-bold">
+                                    <p className="truncate text-sm font-bold text-[#F5F5F5]">
                                         {owner.name}
                                     </p>
 
-                                    <p className="text-xs text-[#8A8578]">
+                                    <p className="text-xs text-[#A7A7AB]">
                                         {owner.role}
                                     </p>
                                 </div>
@@ -272,21 +254,24 @@ export default function Dashboard() {
                     <main className="min-w-0 flex-1">
 
                         {/* Header */}
-                        <header className="border-b border-[#E6DAB8] bg-[#FFFBF2] px-5 py-5 sm:px-6 lg:px-10">
+                        <header className="border-b border-[#353538] bg-[#1B1B1D] px-5 py-5 sm:px-6 lg:px-10">
 
                             <div className="flex items-center justify-between gap-5">
 
                                 <div className="min-w-0">
 
-                                    <p className="truncate text-xs font-semibold text-[#8A8578]">
+                                    <p className="truncate text-xs font-semibold text-[#A7A7AB]">
                                         {owner.shopName}
                                     </p>
 
-                                    <h1 className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">
+                                    <h1
+                                        className="mt-1 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl"
+                                        style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                    >
                                         Good morning, {owner.name.split(' ')[0]}
                                     </h1>
 
-                                    <p className="mt-1 hidden text-sm text-[#8A8578] sm:block">
+                                    <p className="mt-1 hidden text-sm text-[#A7A7AB] sm:block">
                                         Here's your M-Pesa reconciliation overview.
                                     </p>
 
@@ -294,11 +279,11 @@ export default function Dashboard() {
 
                                 <div className="hidden text-right sm:block">
 
-                                    <p className="text-sm font-semibold">
+                                    <p className="text-sm font-semibold text-[#F5F5F5]">
                                         Saturday, 22 August
                                     </p>
 
-                                    <p className="mt-1 text-xs text-[#8A8578]">
+                                    <p className="mt-1 text-xs text-[#A7A7AB]">
                                         Owner account
                                     </p>
 
@@ -311,18 +296,17 @@ export default function Dashboard() {
                         {/* Content */}
                         <div className="p-5 sm:p-6 lg:p-10">
 
-                            {/* ==================================================
-                                OVERVIEW
-                            ================================================== */}
-
                             <section>
 
                                 <div className="mb-5">
-                                    <h2 className="text-base font-bold">
+                                    <h2
+                                        className="text-base font-bold text-[#F5F5F5]"
+                                        style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                    >
                                         Today's overview
                                     </h2>
 
-                                    <p className="mt-1 text-xs text-[#8A8578]">
+                                    <p className="mt-1 text-xs text-[#A7A7AB]">
                                         Monitor collections and reconciliation activity.
                                     </p>
                                 </div>
@@ -371,23 +355,26 @@ export default function Dashboard() {
                                     TRANSACTIONS
                                 ================================================== */}
 
-                                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2]">
+                                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#353538] bg-[#1B1B1D]">
 
-                                    <div className="flex items-center justify-between gap-4 border-b border-[#E6DAB8] px-5 py-5">
+                                    <div className="flex items-center justify-between gap-4 border-b border-[#353538] px-5 py-5">
 
                                         <div>
-                                            <h2 className="font-bold">
+                                            <h2
+                                                className="font-bold text-[#F5F5F5]"
+                                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                            >
                                                 Recent Transactions
                                             </h2>
 
-                                            <p className="mt-1 text-xs text-[#8A8578]">
+                                            <p className="mt-1 text-xs text-[#A7A7AB]">
                                                 Latest M-Pesa activity from your shop
                                             </p>
                                         </div>
 
                                         <Link
                                             href="/owner/transactions"
-                                            className="shrink-0 text-sm font-bold text-[#4E7D67] hover:text-[#355B49]"
+                                            className="shrink-0 text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
                                         >
                                             View all
                                         </Link>
@@ -395,7 +382,7 @@ export default function Dashboard() {
                                     </div>
 
                                     {/* Table header */}
-                                    <div className="hidden grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] border-b border-[#E6DAB8] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[#8A8578] md:grid">
+                                    <div className="hidden grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] border-b border-[#353538] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB] md:grid">
 
                                         <span>Reference</span>
                                         <span>Customer</span>
@@ -406,7 +393,7 @@ export default function Dashboard() {
                                     </div>
 
                                     {/* Rows */}
-                                    <div className="divide-y divide-[#E6DAB8]">
+                                    <div className="divide-y divide-[#353538]">
 
                                         {transactions.map((transaction) => (
                                             <TransactionRow
@@ -423,14 +410,17 @@ export default function Dashboard() {
                                     RECONCILIATION SUMMARY
                                 ================================================== */}
 
-                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+                                <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
                                     <div>
-                                        <h2 className="font-bold">
+                                        <h2
+                                            className="font-bold text-[#F5F5F5]"
+                                            style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                        >
                                             Reconciliation
                                         </h2>
 
-                                        <p className="mt-1 text-xs text-[#8A8578]">
+                                        <p className="mt-1 text-xs text-[#A7A7AB]">
                                             Today's transaction status
                                         </p>
                                     </div>
@@ -441,25 +431,25 @@ export default function Dashboard() {
                                         <div className="flex items-end justify-between">
 
                                             <div>
-                                                <p className="font-mono text-3xl font-bold">
+                                                <p className="font-mono text-3xl font-bold text-[#F5F5F5]">
                                                     {reconciliationRate}%
                                                 </p>
 
-                                                <p className="mt-1 text-xs text-[#8A8578]">
+                                                <p className="mt-1 text-xs text-[#A7A7AB]">
                                                     Reconciled
                                                 </p>
                                             </div>
 
-                                            <p className="text-xs font-semibold text-[#4E7D67]">
+                                            <p className="text-xs font-semibold text-[#43B47E]">
                                                 {stats.matchedTransactions} / {stats.totalTransactions}
                                             </p>
 
                                         </div>
 
-                                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E6DAB8]">
+                                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#242426]">
 
                                             <div
-                                                className="h-full rounded-full bg-[#4E7D67] transition-all"
+                                                className="h-full rounded-full bg-[#43B47E] transition-all"
                                                 style={{
                                                     width: `${reconciliationRate}%`,
                                                 }}
@@ -497,7 +487,8 @@ export default function Dashboard() {
 
                                     <Link
                                         href="/owner/reconciliation"
-                                        className="mt-7 block rounded-xl bg-[#4E7D67] px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-[#3D6855]"
+                                        className="mt-7 block rounded-xl bg-[#43B47E] px-4 py-3 text-center text-sm font-bold text-[#101010] transition hover:bg-[#57C68E]"
+                                        style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                     >
                                         Review reconciliation
                                     </Link>
@@ -513,23 +504,26 @@ export default function Dashboard() {
                             <div className="mt-6 grid gap-6 lg:grid-cols-2">
 
                                 {/* Shop */}
-                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+                                <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
                                     <div className="flex items-start justify-between gap-4">
 
                                         <div>
-                                            <h2 className="font-bold">
+                                            <h2
+                                                className="font-bold text-[#F5F5F5]"
+                                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                            >
                                                 Shop profile
                                             </h2>
 
-                                            <p className="mt-1 text-xs text-[#8A8578]">
+                                            <p className="mt-1 text-xs text-[#A7A7AB]">
                                                 Your business information
                                             </p>
                                         </div>
 
                                         <Link
                                             href="/owner/shop"
-                                            className="text-sm font-bold text-[#4E7D67]"
+                                            className="text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
                                         >
                                             Manage
                                         </Link>
@@ -563,14 +557,17 @@ export default function Dashboard() {
                                 </section>
 
                                 {/* Quick Actions */}
-                                <section className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+                                <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
                                     <div>
-                                        <h2 className="font-bold">
+                                        <h2
+                                            className="font-bold text-[#F5F5F5]"
+                                            style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                        >
                                             Quick actions
                                         </h2>
 
-                                        <p className="mt-1 text-xs text-[#8A8578]">
+                                        <p className="mt-1 text-xs text-[#A7A7AB]">
                                             Common tasks for your shop
                                         </p>
                                     </div>
@@ -640,8 +637,8 @@ function NavItem({
             className={[
                 'mb-1 block rounded-xl px-3 py-2.5 text-sm font-semibold transition',
                 active
-                    ? 'bg-[#4E7D67] text-white'
-                    : 'text-[#2B2B2B] hover:bg-[#FFF4DA]',
+                    ? 'bg-[#43B47E] text-[#101010]'
+                    : 'text-[#F5F5F5] hover:bg-[#242426]',
             ].join(' ')}
         >
             {label}
@@ -670,17 +667,17 @@ function StatCard({
 }: StatCardProps) {
 
     const accentStyles = {
-        green: 'bg-[#4E7D67]',
+        green: 'bg-[#43B47E]',
         yellow: 'bg-[#F2B84B]',
-        red: 'bg-[#E85D5D]',
+        red: 'bg-[#FF6B6B]',
     };
 
     return (
-        <div className="rounded-2xl border border-[#E6DAB8] bg-[#FFFBF2] p-5">
+        <div className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
             <div className="flex items-center justify-between gap-3">
 
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#8A8578]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
                     {label}
                 </p>
 
@@ -690,11 +687,11 @@ function StatCard({
 
             </div>
 
-            <p className="mt-4 font-mono text-2xl font-bold tracking-tight">
+            <p className="mt-4 font-mono text-2xl font-bold tracking-tight text-[#F5F5F5]">
                 {value}
             </p>
 
-            <p className="mt-2 text-xs text-[#8A8578]">
+            <p className="mt-2 text-xs text-[#A7A7AB]">
                 {description}
             </p>
 
@@ -717,42 +714,42 @@ function TransactionRow({
 }: TransactionRowProps) {
 
     const statusClass = {
-        Matched: 'bg-[#4E7D67]/10 text-[#4E7D67]',
-        Pending: 'bg-[#F2B84B]/20 text-[#8A6500]',
-        Unmatched: 'bg-[#E85D5D]/10 text-[#C44747]',
-        Failed: 'bg-[#E85D5D]/10 text-[#C44747]',
+        Matched: 'bg-[#43B47E]/15 text-[#5FD69B]',
+        Pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
+        Unmatched: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+        Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     }[transaction.status];
 
     return (
         <div className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] md:items-center">
 
             <div>
-                <p className="font-mono text-sm font-semibold">
+                <p className="font-mono text-sm font-semibold text-[#F5F5F5]">
                     {transaction.reference}
                 </p>
 
-                <p className="mt-1 text-[11px] text-[#8A8578]">
+                <p className="mt-1 text-[11px] text-[#A7A7AB]">
                     {transaction.mpesaReceipt}
                 </p>
             </div>
 
-            <div className="text-sm">
+            <div className="text-sm text-[#F5F5F5]">
 
                 <p>
                     {transaction.phone}
                 </p>
 
-                <p className="mt-1 text-[11px] text-[#8A8578]">
+                <p className="mt-1 text-[11px] text-[#A7A7AB]">
                     {transaction.time}
                 </p>
 
             </div>
 
-            <div className="text-sm text-[#8A8578]">
+            <div className="text-sm text-[#A7A7AB]">
                 {transaction.till}
             </div>
 
-            <div className="font-mono text-sm font-semibold">
+            <div className="font-mono text-sm font-semibold text-[#F5F5F5]">
                 {formatKES(transaction.amount)}
             </div>
 
@@ -794,9 +791,9 @@ function StatusSummary({
             : 0;
 
     const dotClass = {
-        matched: 'bg-[#4E7D67]',
+        matched: 'bg-[#43B47E]',
         pending: 'bg-[#F2B84B]',
-        exception: 'bg-[#E85D5D]',
+        exception: 'bg-[#FF6B6B]',
     }[type];
 
     return (
@@ -810,19 +807,19 @@ function StatusSummary({
                         className={`h-2 w-2 rounded-full ${dotClass}`}
                     />
 
-                    <span className="text-sm font-semibold">
+                    <span className="text-sm font-semibold text-[#F5F5F5]">
                         {label}
                     </span>
 
                 </div>
 
-                <span className="font-mono text-xs text-[#8A8578]">
+                <span className="font-mono text-xs text-[#A7A7AB]">
                     {value}
                 </span>
 
             </div>
 
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E6DAB8]">
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#242426]">
 
                 <div
                     className={`h-full rounded-full ${dotClass}`}
@@ -854,11 +851,11 @@ function InfoItem({
 }: InfoItemProps) {
     return (
         <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8A8578]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
                 {label}
             </p>
 
-            <p className="mt-1 text-sm font-semibold">
+            <p className="mt-1 text-sm font-semibold text-[#F5F5F5]">
                 {value}
             </p>
         </div>
@@ -885,21 +882,21 @@ function QuickAction({
     return (
         <Link
             href={href}
-            className="group rounded-xl border border-[#E6DAB8] p-4 transition hover:border-[#4E7D67] hover:bg-[#FFF4DA]"
+            className="group rounded-xl border border-[#353538] bg-[#242426] p-4 transition hover:border-[#43B47E] hover:bg-[#2A2A2D]"
         >
             <div className="flex items-center justify-between gap-3">
 
                 <div>
-                    <p className="text-sm font-bold">
+                    <p className="text-sm font-bold text-[#F5F5F5]">
                         {title}
                     </p>
 
-                    <p className="mt-1 text-xs text-[#8A8578]">
+                    <p className="mt-1 text-xs text-[#A7A7AB]">
                         {description}
                     </p>
                 </div>
 
-                <span className="text-lg text-[#8A8578] transition group-hover:translate-x-0.5 group-hover:text-[#4E7D67]">
+                <span className="text-lg text-[#A7A7AB] transition group-hover:translate-x-0.5 group-hover:text-[#43B47E]">
                     →
                 </span>
 
@@ -907,4 +904,3 @@ function QuickAction({
         </Link>
     );
 }
-
