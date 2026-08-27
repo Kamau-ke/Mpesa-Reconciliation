@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('amount', 10,2);
             $table->string('phone_number');
             $table->timestamp('transaction_date');
-            $table->enum('status', ['pending', 'success', 'failed', 'cancelled']);
+            $table->enum('status', ['pending', 'success', 'failed', 'cancelled'])->default('success');
             $table->integer('result_code');
             $table->string('result_desc');
             $table->json('raw_payload')->nullable();

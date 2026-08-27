@@ -77,8 +77,5 @@ class User extends Authenticatable implements PasskeyUser
     }
 
 
-
-
-
     
 }
