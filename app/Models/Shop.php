@@ -17,6 +17,10 @@ class Shop extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function transactions():HasMany{
+        return $this->hasMany(Transaction::class);
+    }
+
     public function staffMembers():HasMany{
         return $this->hasMany(User::class, 'shop_id');
     }

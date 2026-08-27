@@ -63,4 +63,13 @@ class ShopController extends Controller
             $shop->delete();
             return 'shop deleted';
      }
+
+     public function showTransactions($shopId){
+        $shop=auth()->user()->ownedShops()->findOrFail($shopId);
+        $transactions=$shop->transactions()-latest()->get();
+
+        return 'This are the transactions available';
+     }
+
+     
 }

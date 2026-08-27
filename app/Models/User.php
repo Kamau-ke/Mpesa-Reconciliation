@@ -62,6 +62,8 @@ class User extends Authenticatable implements PasskeyUser
         return $this->belongsTo(Shop::class, 'shop_id');
     }
 
+   
+
     public function isOwner(){
         return $this->role==='owner';
     }
