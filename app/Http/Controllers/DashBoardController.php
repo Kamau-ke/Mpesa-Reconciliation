@@ -19,7 +19,13 @@ class DashboardController extends Controller
         /** @var User $user */
        
         
-       
+       $latestTransactions=auth()->user()->transactions()->latest()->take(10)->get();
+       $sumOfAllTransactions=auth()->user()->transactions()->sum('amount');
+
+    //    get daily tot transactions
+
+
+    // return latest transaction and sum to dashboard
 
         return Inertia::render('dashboard');
 

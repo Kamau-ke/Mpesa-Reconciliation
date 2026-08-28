@@ -73,5 +73,19 @@ class ShopController extends Controller
         return 'This are the transactions available';
      }
 
+    //  get daily transactions
+
+    public function getSum(string $period='daily'): float {
+        $query=$this->showTransactions();
+
+        return match($period){
+        'daily'   => $query->whereDate('transaction_date', today())->sum('amount'),
+        'weekly'  => $query->whereBetween('transaction_date', [now()->startOfWeek(), now()->endOfWeek()])->sum('amount'),
+        'monthly' => $query->whereMonth('transaction_date', now()->month)->whereYear('transaction_date', now()->year)->sum('amount'),
+        'yearly'  => $query->whereYear('transaction_date', now()->year)->sum('amount'),
+        default   => throw new \InvalidArgumentException("Invalid period: {$period}"),
+        };
+    }
+
      
 }
