@@ -10,7 +10,7 @@ class Shop extends Model
 {
     //
 
-    protected $fillable = ['name', 'till_number', 'location', 'currency', 'passkey'];
+    protected $fillable = ['name', 'till_number', 'location', 'currency', 'passkey', 'user_id'];
 
 
     public function user():BelongsTo{

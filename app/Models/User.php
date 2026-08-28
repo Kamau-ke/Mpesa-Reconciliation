@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -74,6 +75,10 @@ class User extends Authenticatable implements PasskeyUser
 
     public function isActive(){
         return $this->status==='active';
+    }
+
+    public function transactions():HasManyThrough{
+        return $this->hasManyThrough(Transaction::class, Shop::class, 'user_id', 'shop_id');
     }
 
 

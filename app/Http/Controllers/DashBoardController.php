@@ -18,10 +18,12 @@ class DashboardController extends Controller
     {
         /** @var User $user */
        
-
+        
        
 
         return Inertia::render('dashboard');
 
     }
+
+
 }
