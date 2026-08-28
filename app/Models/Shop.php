@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,11 @@ class Shop extends Model
 {
     //
 
+    use HasFactory;
+
     protected $fillable = ['name', 'till_number', 'location', 'currency', 'passkey', 'user_id'];
+
+    
 
 
     public function user():BelongsTo{

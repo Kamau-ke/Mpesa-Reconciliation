@@ -53,7 +53,7 @@ class User extends Authenticatable implements PasskeyUser
         ];
     }
 
-    public function ownedShops():HasMany{
+    public function shop():HasMany{
         return $this->hasMany(Shop::class);
     }
 
