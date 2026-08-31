@@ -69,8 +69,8 @@ class ShopController extends Controller
      }
 
      public function showTransactions($shopId){
-        $shop=auth()->user()->ownedShops()->findOrFail($shopId);
-        $transactions=$shop->transactions()-latest()->get();
+        $shop=auth()->user()->shop()->findOrFail($shopId);
+        $transactions=$shop->transactions()->latest()->get();
         dd($transactions);
         return 'Transactions';
      }
