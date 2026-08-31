@@ -24,7 +24,7 @@ class DashboardController extends Controller
 
     //    get daily tot transactions
 
-
+    // dump(auth()->user());
     // return latest transaction and sum to dashboard
 
         return Inertia::render('dashboard');

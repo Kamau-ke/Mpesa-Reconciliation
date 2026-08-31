@@ -12,6 +12,8 @@ class ShopController extends Controller
 {
     //
 
+
+
     public function store(Request $request){
        // 'name', 'till_number', 'location', 'currency', 'passkey'
 
@@ -69,8 +71,8 @@ class ShopController extends Controller
      public function showTransactions($shopId){
         $shop=auth()->user()->ownedShops()->findOrFail($shopId);
         $transactions=$shop->transactions()-latest()->get();
-
-        return 'This are the transactions available';
+        dd($transactions);
+        return 'Transactions';
      }
 
     //  get daily transactions
