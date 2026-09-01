@@ -9,15 +9,18 @@ type TransactionStatus =
 
 type Transaction = {
     id: number;
-    reference: string;
+    mpesa_receipt_number: string;
     mpesaReceipt: string;
-    phone: string;
-    employee: string;
-    till: string;
+    phone_number: string;
+    sender_name: string;
     amount: number;
     status: TransactionStatus;
     time: string;
 };
+
+interface transactionProps{
+    latestTransactions:Transaction[];
+}
 
 type Owner = {
     name: string;
@@ -138,7 +141,7 @@ function handleLogout() {
     router.post('/logout');
 }
 
-export default function Dashboard() {
+export default function Dashboard({latestTransactions}) {
     const reconciliationRate =
         stats.totalTransactions > 0
             ? Math.round(
@@ -149,6 +152,8 @@ export default function Dashboard() {
     return (
         <>
             <Head title="Owner Dashboard" />
+
+            
 
             <div className="min-h-screen bg-[#101010] text-[#F5F5F5] [font-family:'Inter',ui-sans-serif,sans-serif]">
                 <div className="flex min-h-screen">
@@ -378,8 +383,8 @@ export default function Dashboard() {
 
                                     {/* Rows */}
                                     <div className="divide-y divide-[#353538]">
-
-                                        {transactions.map((transaction) => (
+                                        {console.log(latestTransactions)}
+                                        {latestTransactions.map((transaction) => (
                                             <TransactionRow
                                                 key={transaction.id}
                                                 transaction={transaction}
@@ -797,18 +802,18 @@ function TransactionRow({
 
             <div>
                 <p className="font-mono text-sm font-semibold text-[#F5F5F5]">
-                    {transaction.reference}
+                    {transaction.sender_name}
                 </p>
 
                 <p className="mt-1 text-[11px] text-[#A7A7AB]">
-                    {transaction.mpesaReceipt}
+                    {transaction.mpesa_receipt_number}
                 </p>
             </div>
 
             <div className="text-sm text-[#F5F5F5]">
 
                 <p>
-                    {transaction.phone}
+                    {transaction.phone_number}
                 </p>
 
                 <p className="mt-1 text-[11px] text-[#A7A7AB]">

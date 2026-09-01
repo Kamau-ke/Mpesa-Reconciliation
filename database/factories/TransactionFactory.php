@@ -28,6 +28,7 @@ class TransactionFactory extends Factory
             'mpesa_receipt_number' => strtoupper(fake()->bothify('??#######')),
             'amount' => fake()->randomFloat(2, 50, 5000),
             'phone_number' => '2547' . fake()->numerify('########'),
+            'sender_name'=>fake()->name(),
             'transaction_date' => fake()->dateTimeBetween('-6 months', 'now'),
             'status' => $status,
             'result_code' => $status === 'success' ? 0 : fake()->randomElement([1, 1032, 1037, 2001]),

@@ -27,7 +27,7 @@ class DashboardController extends Controller
     // dump(auth()->user());
     // return latest transaction and sum to dashboard
 
-        return Inertia::render('dashboard',compact('latestTransactions'));
+        return Inertia::render('dashboard',compact('latestTransactions', 'sumOfAllTransactions'));
 
     }
 
