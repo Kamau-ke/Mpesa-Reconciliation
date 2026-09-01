@@ -16,6 +16,8 @@ type Transaction = {
     amount: number;
     status: TransactionStatus;
     time: string;
+    shop_name: string;
+    till_number: string;
 };
 
 interface transactionProps{
@@ -823,7 +825,7 @@ function TransactionRow({
             </div>
 
             <div className="text-sm text-[#A7A7AB]">
-                {transaction.till}
+                {transaction.till_number}
             </div>
 
             <div className="font-mono text-sm font-semibold text-[#F5F5F5]">

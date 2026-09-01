@@ -19,7 +19,24 @@ class DashboardController extends Controller
         /** @var User $user */
        
         
-       $latestTransactions=auth()->user()->transactions()->latest()->take(10)->get();
+     $latestTransactions = auth()->user()->transactions()
+    ->with('shop')
+    ->latest()
+    ->take(10)
+    ->get()
+    ->map(fn ($t) => [
+        'id' => $t->id,
+        'mpesa_receipt_number' => $t->mpesa_receipt_number,
+        'mpesaReceipt' => $t->mpesaReceipt,
+        'phone_number' => $t->phone_number,
+        'sender_name' => $t->sender_name,
+        'amount' => $t->amount,
+        'status' => $t->status,
+        'time' => $t->created_at->format('h:i A'),
+        'shop_name' => $t->shop->name,
+        'till_number' => $t->shop->till_number,
+    ]);
+
        $sumOfAllTransactions=auth()->user()->transactions()->sum('amount');
 
     //    get daily tot transactions
