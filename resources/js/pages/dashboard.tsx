@@ -22,6 +22,7 @@ type Transaction = {
 
 interface transactionProps{
     latestTransactions:Transaction[];
+    sumOfAllTransactions:number;
 }
 
 type Owner = {
@@ -143,7 +144,7 @@ function handleLogout() {
     router.post('/logout');
 }
 
-export default function Dashboard({latestTransactions}) {
+export default function Dashboard({latestTransactions, sumOfAllTransactions}) {
     const reconciliationRate =
         stats.totalTransactions > 0
             ? Math.round(
@@ -306,7 +307,7 @@ export default function Dashboard({latestTransactions}) {
 
                                     <StatCard
                                         label="Today's Collections"
-                                        value={formatKES(stats.todayCollections)}
+                                        value={formatKES(sumOfAllTransactions)}
                                         description="Total M-Pesa received"
                                         accent="green"
                                     />
