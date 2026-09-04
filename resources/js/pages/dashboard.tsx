@@ -1,5 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+
 
 type TransactionStatus =
     | 'Matched'
@@ -32,6 +33,18 @@ type Owner = {
     role: string;
 };
 
+type AuthUser={
+    id: number;
+    name: string;
+    email: string;
+}
+
+type PageProps = {
+    auth: {
+        user: AuthUser;
+    };
+};
+
 type DashboardStats = {
     todayCollections: number;
     reconciledAmount: number;
@@ -57,63 +70,7 @@ const stats: DashboardStats = {
     matchedTransactions: 116,
 };
 
-const transactions: Transaction[] = [
-    {
-        id: 1,
-        reference: 'TXN-1001',
-        mpesaReceipt: 'QGH7A8B9C1',
-        phone: '0712 456 789',
-        employee: 'Mary Wanjiku',
-        till: 'Till 01',
-        amount: 1200,
-        status: 'Matched',
-        time: '10:42 AM',
-    },
-    {
-        id: 2,
-        reference: 'TXN-1002',
-        mpesaReceipt: 'QGH7A8B9C2',
-        phone: '0721 345 678',
-        employee: 'Peter Kamau',
-        till: 'Till 02',
-        amount: 850,
-        status: 'Matched',
-        time: '10:35 AM',
-    },
-    {
-        id: 3,
-        reference: 'TXN-1003',
-        mpesaReceipt: 'QGH7A8B9C3',
-        phone: '0708 234 567',
-        employee: 'John Mwangi',
-        till: 'Till 01',
-        amount: 2400,
-        status: 'Pending',
-        time: '10:21 AM',
-    },
-    {
-        id: 4,
-        reference: 'TXN-1004',
-        mpesaReceipt: 'QGH7A8B9C4',
-        phone: '0798 456 123',
-        employee: 'Mary Wanjiku',
-        till: 'Till 03',
-        amount: 500,
-        status: 'Matched',
-        time: '09:58 AM',
-    },
-    {
-        id: 5,
-        reference: 'TXN-1005',
-        mpesaReceipt: 'QGH7A8B9C5',
-        phone: '0715 987 654',
-        employee: 'Peter Kamau',
-        till: 'Till 02',
-        amount: 1750,
-        status: 'Unmatched',
-        time: '09:41 AM',
-    },
-];
+
 
 const shop = {
     name: 'Kadogo Shop',
@@ -146,6 +103,9 @@ function handleLogout() {
 }
 
 export default function Dashboard({latestTransactions, sumOfAllTransactions, sumOfTodayTransactions}) {
+    const { auth } = usePage<PageProps>().props;
+
+    
     const reconciliationRate =
         stats.totalTransactions > 0
             ? Math.round(
@@ -236,7 +196,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                         </nav>
 
                         {/* Owner */}
-                        <OwnerMenu owner={owner} />
+                        <OwnerMenu auth={auth} />
 
                     </aside>
 
@@ -261,7 +221,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                                         className="mt-1 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl"
                                         style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                     >
-                                        Good morning, {owner.name.split(' ')[0]}
+                                        Good morning, {auth.user.name.split(' ')[0]}
                                     </h1>
 
                                     <p className="mt-1 hidden text-sm text-[#A7A7AB] sm:block">
@@ -648,7 +608,8 @@ type OwnerMenuProps = {
     owner: Owner;
 };
 
-function OwnerMenu({ owner }: OwnerMenuProps) {
+function OwnerMenu({ auth }: OwnerMenuProps) {
+
     const [open, setOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -703,16 +664,16 @@ function OwnerMenu({ owner }: OwnerMenuProps) {
             >
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#43B47E] text-sm font-bold text-[#101010]">
-                    {getInitials(owner.name)}
+                    {getInitials(auth.user.name)}
                 </div>
 
                 <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-[#F5F5F5]">
-                        {owner.name}
+                        {auth.user.name}
                     </p>
 
                     <p className="text-xs text-[#A7A7AB]">
-                        {owner.role}
+                        {auth.user.role}
                     </p>
                 </div>
 
