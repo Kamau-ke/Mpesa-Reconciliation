@@ -23,6 +23,7 @@ type Transaction = {
 interface transactionProps{
     latestTransactions:Transaction[];
     sumOfAllTransactions:number;
+    sumOfTodayTransactions:number;
 }
 
 type Owner = {
@@ -144,7 +145,7 @@ function handleLogout() {
     router.post('/logout');
 }
 
-export default function Dashboard({latestTransactions, sumOfAllTransactions}) {
+export default function Dashboard({latestTransactions, sumOfAllTransactions, sumOfTodayTransactions}) {
     const reconciliationRate =
         stats.totalTransactions > 0
             ? Math.round(
@@ -307,27 +308,27 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions}) {
 
                                     <StatCard
                                         label="Today's Collections"
-                                        value={formatKES(sumOfAllTransactions)}
+                                        value={formatKES(sumOfTodayTransactions)}
                                         description="Total M-Pesa received"
                                         accent="green"
                                     />
 
                                     <StatCard
-                                        label="Reconciled"
+                                        label="Total Transactions"
                                         value={formatKES(stats.reconciledAmount)}
                                         description={`${reconciliationRate}% successfully matched`}
                                         accent="green"
                                     />
 
                                     <StatCard
-                                        label="Pending"
+                                        label="Successful Transaction"
                                         value={formatKES(stats.pendingAmount)}
                                         description="Awaiting reconciliation"
                                         accent="yellow"
                                     />
 
                                     <StatCard
-                                        label="Exceptions"
+                                        label="Cancelled"
                                         value={stats.exceptions.toString()}
                                         description="Transactions need attention"
                                         accent="red"
@@ -386,7 +387,6 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions}) {
 
                                     {/* Rows */}
                                     <div className="divide-y divide-[#353538]">
-                                        {console.log(latestTransactions)}
                                         {latestTransactions.map((transaction) => (
                                             <TransactionRow
                                                 key={transaction.id}
@@ -794,10 +794,9 @@ function TransactionRow({
 }: TransactionRowProps) {
 
     const statusClass = {
-        Matched: 'bg-[#43B47E]/15 text-[#5FD69B]',
+        success: 'bg-[#43B47E]/15 text-[#5FD69B]',
         Pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
-        Unmatched: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
-        Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+        cancelled: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     }[transaction.status];
 
     return (
@@ -855,7 +854,7 @@ type StatusSummaryProps = {
     label: string;
     value: number;
     total: number;
-    type: 'matched' | 'pending' | 'exception';
+    type: 'pending' | 'success' | 'cancelled'; 
 };
 
 function StatusSummary({
@@ -871,9 +870,9 @@ function StatusSummary({
             : 0;
 
     const dotClass = {
-        matched: 'bg-[#43B47E]',
-        pending: 'bg-[#F2B84B]',
-        exception: 'bg-[#FF6B6B]',
+        pending: 'bg-[#43B47E]',
+        success: 'bg-[#F2B84B]',
+        cancelled: 'bg-[#FF6B6B]',
     }[type];
 
     return (

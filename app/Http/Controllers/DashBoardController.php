@@ -38,13 +38,14 @@ class DashboardController extends Controller
     ]);
 
        $sumOfAllTransactions=auth()->user()->transactions()->sum('amount');
+       $sumOfTodayTransactions=auth()->user()->transactions()->whereDate('transactions.created_at', today())->sum('amount');
 
     //    get daily tot transactions
 
     // dump(auth()->user());
     // return latest transaction and sum to dashboard
 
-        return Inertia::render('dashboard',compact('latestTransactions', 'sumOfAllTransactions'));
+        return Inertia::render('dashboard',compact('latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions'));
 
     }
 
