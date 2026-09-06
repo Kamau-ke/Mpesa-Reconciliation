@@ -21,7 +21,7 @@ class DashboardController extends Controller
     $shops=auth()->user()->shop()->get(['id', 'name']);
 
 
-     $activeShopId = $request->integer('shop_id') ?: $shops->first()?->id;
+     $activeShopId = $request->integer('shop_id') ?: null;
 
      $latestTransactions = auth()->user()->transactions()
     ->with('shop')

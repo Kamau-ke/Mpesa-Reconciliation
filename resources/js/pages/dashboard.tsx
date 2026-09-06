@@ -169,12 +169,6 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                             />
 
                             <ShopNavDropdown shops={shops} activeShopId={activeShopId} />
-
-                            <NavItem
-                                label="Shop"
-                                href="/owner/shop"
-                            />
-
                             <NavItem
                                 label="Profile"
                                 href="/owner/profile"

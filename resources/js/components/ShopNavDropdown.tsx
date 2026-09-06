@@ -49,7 +49,7 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                 ].join(' ')}
             >
                 <span className="truncate">
-                    {activeShop ? activeShop.name : 'Shop'}
+                    {activeShop ? activeShop.name : 'Shops'}
                 </span>
 
                 <span
