@@ -17,8 +17,12 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         /** @var User $user */
-       
-        
+
+    $shops=auth()->user()->shop()->get(['id', 'name']);
+
+
+     $activeShopId = $request->integer('shop_id') ?: $shops->first()?->id;
+
      $latestTransactions = auth()->user()->transactions()
     ->with('shop')
     ->latest()
@@ -45,7 +49,7 @@ class DashboardController extends Controller
     // dump(auth()->user());
     // return latest transaction and sum to dashboard
 
-        return Inertia::render('dashboard',compact('latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions'));
+        return Inertia::render('dashboard',compact('latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions', 'shops', 'activeShopId'));
 
     }
 

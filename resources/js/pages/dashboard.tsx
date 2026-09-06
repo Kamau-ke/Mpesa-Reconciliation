@@ -1,12 +1,17 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-
+import ShopNavDropdown from '@/components/ShopNavDropdown';
 
 type TransactionStatus =
     | 'Matched'
     | 'Pending'
     | 'Unmatched'
     | 'Failed';
+
+type shops= {
+    id:number;
+    name:string;
+}
 
 type Transaction = {
     id: number;
@@ -25,6 +30,8 @@ interface transactionProps{
     latestTransactions:Transaction[];
     sumOfAllTransactions:number;
     sumOfTodayTransactions:number;
+    shops:Shop[];
+    activeShopId: number | null;
 }
 
 type Owner = {
@@ -102,7 +109,7 @@ function handleLogout() {
     router.post('/logout');
 }
 
-export default function Dashboard({latestTransactions, sumOfAllTransactions, sumOfTodayTransactions}) {
+export default function Dashboard({latestTransactions, sumOfAllTransactions, sumOfTodayTransactions, shops, activeShopId}) {
     const { auth } = usePage<PageProps>().props;
 
     
@@ -161,11 +168,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                                 href="/owner/reconciliation"
                             />
 
-                            <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
-                                    Shop
-                                </p>
-                            </div>
+                            <ShopNavDropdown shops={shops} activeShopId={activeShopId} />
 
                             <NavItem
                                 label="Shop"
