@@ -7,10 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class ShopController extends Controller
 {
     //
+
+    public function index(){
+        return 'this is index';
+    }
 
 
 
@@ -32,6 +37,10 @@ class ShopController extends Controller
         'currency'=>$validated['currency'],
         'passkey'=>Crypt::encryptString($validated['passkey'])
        ]);
+    }
+
+    public function show(Shop $shop){
+        return Inertia::render('shop', compact('shop'));
     }
 
     public function edit(Shop $shop){
