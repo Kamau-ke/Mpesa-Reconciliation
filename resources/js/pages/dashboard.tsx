@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import ShopNavDropdown from '@/components/ShopNavDropdown';
+import OwnerMenu from '@/components/owner-menu';
 
 type TransactionStatus =
     | 'Matched'
@@ -133,69 +134,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                         SIDEBAR
                     ====================================================== */}
 
-                    <aside className="hidden w-64 shrink-0 border-r border-[#353538] bg-[#1B1B1D] lg:flex lg:flex-col">
-
-                        {/* Logo */}
-                        <div className="px-6 pb-8 pt-7">
-                            <div
-                                className="text-2xl font-bold tracking-tight text-[#F5F5F5]"
-                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                            >
-                                kadogo
-                            </div>
-
-                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#A7A7AB]">
-                                M-Pesa Reconciliation
-                            </p>
-                        </div>
-
-                        {/* Navigation */}
-                        <nav className="flex-1 px-4">
-
-                            <NavItem
-                                label="Dashboard"
-                                href="/owner/dashboard"
-                                active
-                            />
-
-                            <NavItem
-                                label="Transactions"
-                                href="/owner/transactions"
-                            />
-
-                            <NavItem
-                                label="Reconciliation"
-                                href="/owner/reconciliation"
-                            />
-
-                            <ShopNavDropdown shops={shops} activeShopId={activeShopId} />
-                            <NavItem
-                                label="Profile"
-                                href="/owner/profile"
-                            />
-
-                            <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
-                                    Management
-                                </p>
-                            </div>
-
-                            <NavItem
-                                label="Employees"
-                                href="/owner/employees"
-                            />
-
-                            <NavItem
-                                label="Tills"
-                                href="/owner/tills"
-                            />
-
-                        </nav>
-
-                        {/* Owner */}
-                        <OwnerMenu auth={auth} />
-
-                    </aside>
+                   
 
                     {/* ======================================================
                         MAIN
@@ -569,31 +508,9 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
 |--------------------------------------------------------------------------
 */
 
-type NavItemProps = {
-    label: string;
-    href: string;
-    active?: boolean;
-};
 
-function NavItem({
-    label,
-    href,
-    active = false,
-}: NavItemProps) {
-    return (
-        <Link
-            href={href}
-            className={[
-                'mb-1 block rounded-xl px-3 py-2.5 text-sm font-semibold transition',
-                active
-                    ? 'bg-[#43B47E] text-[#101010]'
-                    : 'text-[#F5F5F5] hover:bg-[#242426]',
-            ].join(' ')}
-        >
-            {label}
-        </Link>
-    );
-}
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -601,88 +518,7 @@ function NavItem({
 |--------------------------------------------------------------------------
 */
 
-type OwnerMenuProps = {
-    owner: Owner;
-};
-
-function OwnerMenu({ auth }: OwnerMenuProps) {
-
-    const [open, setOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(event.target as Node)
-            ) {
-                setOpen(false);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    return (
-        <div
-            ref={menuRef}
-            className="relative border-t border-[#353538] p-5"
-        >
-
-            {/* Dropdown */}
-            {open && (
-                <div className="absolute bottom-full left-5 right-5 mb-2 overflow-hidden rounded-xl border border-[#353538] bg-[#242426] shadow-lg">
-
-                    <Link
-                        href="/owner/profile"
-                        className="block px-4 py-3 text-sm font-semibold text-[#F5F5F5] hover:bg-[#2A2A2D]"
-                        onClick={() => setOpen(false)}
-                    >
-                        View profile
-                    </Link>
-
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="block w-full px-4 py-3 text-left text-sm font-semibold text-[#FF6B6B] hover:bg-[#2A2A2D]"
-                    >
-                        Logout
-                    </button>
-
-                </div>
-            )}
-
-            {/* Trigger */}
-            <button
-                type="button"
-                onClick={() => setOpen((prev) => !prev)}
-                className="flex w-full items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-[#242426]"
-            >
-
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#43B47E] text-sm font-bold text-[#101010]">
-                    {getInitials(auth.user.name)}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-[#F5F5F5]">
-                        {auth.user.name}
-                    </p>
-
-                    <p className="text-xs text-[#A7A7AB]">
-                        {auth.user.role}
-                    </p>
-                </div>
-
-                <span className="shrink-0 text-[#A7A7AB]">
-                    ⋮
-                </span>
-
-            </button>
-
-        </div>
-    );
-}
+<OwnerMenu {auth}/>
 
 /*
 |--------------------------------------------------------------------------
