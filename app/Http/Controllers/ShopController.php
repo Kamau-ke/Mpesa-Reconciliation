@@ -68,7 +68,7 @@ class ShopController extends Controller
         ]);
     }
 
-      public function destroy(Shop $shop){
+      public function destroy(Shop $shop){      
             if(auth()->id() !==$shop->user_id){
                 abort(403);
             }

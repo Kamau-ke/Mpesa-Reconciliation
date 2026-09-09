@@ -2,6 +2,8 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import ShopNavDropdown from '@/components/ShopNavDropdown';
 import OwnerMenu from '@/components/owner-menu';
+import {getInitials} from '@/utils'
+import NavBar from '@/components/nav-bar';
 
 type TransactionStatus =
     | 'Matched'
@@ -97,14 +99,7 @@ function formatKES(amount: number) {
     return `KES ${amount.toLocaleString('en-KE')}`;
 }
 
-function getInitials(name: string) {
-    return name
-        .split(' ')
-        .map((part) => part[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
-}
+
 
 function handleLogout() {
     router.post('/logout');
@@ -134,7 +129,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
                         SIDEBAR
                     ====================================================== */}
 
-                   
+                   <NavBar shops={shops} activeShopId={activeShopId} />
 
                     {/* ======================================================
                         MAIN
@@ -518,7 +513,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
 |--------------------------------------------------------------------------
 */
 
-<OwnerMenu {auth}/>
+{/* <OwnerMenu auth={auth}/> */}
 
 /*
 |--------------------------------------------------------------------------
