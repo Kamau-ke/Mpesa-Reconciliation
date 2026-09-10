@@ -1,5 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import {show} from '@/routes';
+// import type { Shop } from '@/types'
 
 type ShopNavDropdownProps = {
     shops: Shop[];
@@ -7,7 +9,7 @@ type ShopNavDropdownProps = {
 };
 
 export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdownProps) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -34,13 +36,15 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
             { preserveState: true, preserveScroll: true },
         );
     }
-
+     
     return (
         <div ref={dropdownRef} className="relative mb-1">
 
+        
+
             <button
                 type="button"
-                onClick={() => setOpen((prev) => !prev)}
+                onClick={() => setOpen((prev) => !prev )}
                 className={[
                     'flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition',
                     open
@@ -48,6 +52,7 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                         : 'text-[#F5F5F5] hover:bg-[#242426]',
                 ].join(' ')}
             >
+                {console.log(open)}
                 <span className="truncate">
                     {activeShop ? activeShop.name : 'Shops'}
                 </span>
@@ -59,19 +64,25 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                 </span>
             </button>
 
+            
+
             {open && (
                 <div className="mt-1 space-y-0.5 pl-2">
+                    
                     {shops.length === 0 && (
                         <p className="px-3 py-2 text-xs text-[#A7A7AB]">
                             No shops yet
                         </p>
                     )}
 
-                    {shops.map((shop) => (
-                        <button
+                    {shops.map((shop) => {
+  
+
+                return (
+                    <Link
                             key={shop.id}
-                            type="button"
-                            onClick={() => switchShop(shop.id)}
+                            href={show.shop({ shop: shop.id })}
+                            onClick={() => setOpen(false)}
                             className={[
                                 'block w-full rounded-lg px-3 py-2 text-left text-sm transition',
                                 shop.id === activeShopId
@@ -80,8 +91,9 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                             ].join(' ')}
                         >
                             {shop.name}
-                        </button>
-                    ))}
+                    </Link>
+                    );
+                })}
 
                     <Link
                         href="/owner/shop"

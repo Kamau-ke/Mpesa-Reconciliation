@@ -16,11 +16,13 @@ interface NavBarProps {
 
 
 export default function NavBar({ shops, activeShopId }: NavBarProps) {
+
+   
    
    
     return (
         <aside className="hidden w-64 shrink-0 border-r border-[#353538] bg-[#1B1B1D] lg:flex lg:flex-col">
-
+             
             
             <div className="px-6 pb-8 pt-7">
                 <div

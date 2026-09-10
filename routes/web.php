@@ -18,7 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
-    Route::get('/owner/shops/{shop}', [ShopController::class, 'show'])->name('show.shop');
+    Route::get('/owner/shops/{shop}', [ShopController::class, 'show'])->name('shop.show');
     Route::get('/shop/{shopId}/transactions', [ShopController::class, 'showTransactions'])->name('showTransactions');
 });
 
