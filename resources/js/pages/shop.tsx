@@ -1,11 +1,32 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 
-/*
-|--------------------------------------------------------------------------
-| Types
-|--------------------------------------------------------------------------
-*/
+type TransactionStatus =
+    | 'Matched'
+    | 'Pending'
+    | 'Unmatched'
+    | 'Failed';
+
+type Transaction = {
+    id: number;
+    mpesa_receipt_number: string;
+    mpesaReceipt: string;
+    phone_number: string;
+    sender_name: string;
+    amount: number;
+    status: TransactionStatus;
+    time: string;
+    shop_name: string;
+    till_number: string;
+};
+
+type Shop = {
+    id: number;
+    name: string;
+    till_number: string;
+    location: string;
+    phone: string;
+};
 
 type AuthUser = {
     id: number;
@@ -19,19 +40,13 @@ type PageProps = {
     };
 };
 
-type Shop = {
-    id: number;
-    name: string;
-    till_number: string;
-    business_type: string;
-    location: string;
-    phone: string;
-    email: string | null;
-    address: string | null;
-};
-
-interface ShopPageProps {
+interface ShopProps {
     shop: Shop;
+    shops: Shop[];
+    activeShopId: number;
+    latestTransactions: Transaction[];
+    sumOfAllTransactions: number;
+    sumOfTodayTransactions: number;
 }
 
 /*
@@ -39,6 +54,10 @@ interface ShopPageProps {
 | Helpers
 |--------------------------------------------------------------------------
 */
+
+function formatKES(amount: number) {
+    return `KES ${amount.toLocaleString('en-KE')}`;
+}
 
 function getInitials(name: string) {
     return name
@@ -53,36 +72,31 @@ function handleLogout() {
     router.post('/logout');
 }
 
-export default function Shop({ shop }: ShopPageProps) {
+
+
+export default function Shop({
+    shop,
+    shops,
+    activeShopId,
+    latestTransactions,
+    sumOfAllTransactions,
+    sumOfTodayTransactions,
+}: ShopProps) {
     const { auth } = usePage<PageProps>().props;
-
-    const { data, setData, patch, processing, errors, recentlySuccessful } =
-        useForm({
-            name: shop.name ?? '',
-            till_number: shop.till_number ?? '',
-            business_type: shop.business_type ?? '',
-            location: shop.location ?? '',
-            phone: shop.phone ?? '',
-            email: shop.email ?? '',
-            address: shop.address ?? '',
-        });
-
-    function submit(e: FormEvent) {
-        e.preventDefault();
-        patch('/owner/shop');
-    }
 
     return (
         <>
-            <Head title="Shop" />
+            <Head title={`${shop.name} — Shop`} />
 
             <div className="min-h-screen bg-[#101010] text-[#F5F5F5] [font-family:'Inter',ui-sans-serif,sans-serif]">
                 <div className="flex min-h-screen">
+
                     {/* ======================================================
                         SIDEBAR
                     ====================================================== */}
 
                     <aside className="hidden w-64 shrink-0 border-r border-[#353538] bg-[#1B1B1D] lg:flex lg:flex-col">
+
                         {/* Logo */}
                         <div className="px-6 pb-8 pt-7">
                             <div
@@ -99,9 +113,21 @@ export default function Shop({ shop }: ShopPageProps) {
 
                         {/* Navigation */}
                         <nav className="flex-1 px-4">
-                            <NavItem label="Dashboard" href="/owner/dashboard" />
-                            <NavItem label="Transactions" href="/owner/transactions" />
-                            <NavItem label="Reconciliation" href="/owner/reconciliation" />
+
+                            <NavItem
+                                label="Dashboard"
+                                href="/owner/dashboard"
+                            />
+
+                            <NavItem
+                                label="Transactions"
+                                href="/owner/transactions"
+                            />
+
+                            <NavItem
+                                label="Reconciliation"
+                                href="/owner/reconciliation"
+                            />
 
                             <div className="pb-2 pt-7">
                                 <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
@@ -109,8 +135,12 @@ export default function Shop({ shop }: ShopPageProps) {
                                 </p>
                             </div>
 
-                            <NavItem label="Shop" href="/owner/shop" active />
-                            <NavItem label="Profile" href="/owner/profile" />
+                            <ShopNavDropdown shops={shops} activeShopId={activeShopId} />
+
+                            <NavItem
+                                label="Profile"
+                                href="/owner/profile"
+                            />
 
                             <div className="pb-2 pt-7">
                                 <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
@@ -118,12 +148,21 @@ export default function Shop({ shop }: ShopPageProps) {
                                 </p>
                             </div>
 
-                            <NavItem label="Employees" href="/owner/employees" />
-                            <NavItem label="Tills" href="/owner/tills" />
+                            <NavItem
+                                label="Employees"
+                                href="/owner/employees"
+                            />
+
+                            <NavItem
+                                label="Tills"
+                                href="/owner/tills"
+                            />
+
                         </nav>
 
                         {/* Owner */}
                         <OwnerMenu auth={auth} />
+
                     </aside>
 
                     {/* ======================================================
@@ -131,182 +170,213 @@ export default function Shop({ shop }: ShopPageProps) {
                     ====================================================== */}
 
                     <main className="min-w-0 flex-1">
+
                         {/* Header */}
                         <header className="border-b border-[#353538] bg-[#1B1B1D] px-5 py-5 sm:px-6 lg:px-10">
+
                             <div className="flex items-center justify-between gap-5">
+
                                 <div className="min-w-0">
+
                                     <p className="truncate text-xs font-semibold text-[#A7A7AB]">
-                                        {shop.name}
+                                        Shop
                                     </p>
 
                                     <h1
                                         className="mt-1 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl"
                                         style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                     >
-                                        Shop profile
+                                        {shop.name}
                                     </h1>
 
                                     <p className="mt-1 hidden text-sm text-[#A7A7AB] sm:block">
-                                        Update your business details and till information.
+                                        M-Pesa reconciliation overview for this shop.
                                     </p>
+
                                 </div>
 
-                                <Link
-                                    href="/owner/dashboard"
-                                    className="hidden shrink-0 rounded-xl border border-[#353538] px-4 py-2.5 text-sm font-bold text-[#F5F5F5] transition hover:border-[#43B47E] hover:text-[#43B47E] sm:block"
-                                >
-                                    Back to dashboard
-                                </Link>
+                                <div className="hidden text-right sm:block">
+
+                                    <p className="text-sm font-semibold text-[#F5F5F5]">
+                                        Till {shop.till_number}
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-[#A7A7AB]">
+                                        {shop.location}
+                                    </p>
+
+                                </div>
+
                             </div>
+
                         </header>
 
                         {/* Content */}
                         <div className="p-5 sm:p-6 lg:p-10">
-                            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-                                {/* ==================================================
-                                    SHOP DETAILS FORM
-                                ================================================== */}
 
-                                <section className="min-w-0 rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5 sm:p-6">
-                                    <div>
-                                        <h2
-                                            className="font-bold text-[#F5F5F5]"
-                                            style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                                        >
-                                            Business information
-                                        </h2>
+                            <section>
 
-                                        <p className="mt-1 text-xs text-[#A7A7AB]">
-                                            This appears on receipts and reconciliation reports.
-                                        </p>
-                                    </div>
+                                <div className="mb-5">
+                                    <h2
+                                        className="text-base font-bold text-[#F5F5F5]"
+                                        style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                    >
+                                        Today's overview
+                                    </h2>
 
-                                    <form onSubmit={submit} className="mt-6 space-y-5">
-                                        <div className="grid gap-5 sm:grid-cols-2">
-                                            <Field
-                                                label="Business name"
-                                                value={data.name}
-                                                onChange={(v) => setData('name', v)}
-                                                error={errors.name}
-                                                placeholder="Kadogo Shop"
-                                            />
+                                    <p className="mt-1 text-xs text-[#A7A7AB]">
+                                        Collections for {shop.name}.
+                                    </p>
+                                </div>
 
-                                            <Field
-                                                label="Till number"
-                                                value={data.till_number}
-                                                onChange={(v) => setData('till_number', v)}
-                                                error={errors.till_number}
-                                                placeholder="123456"
-                                                mono
-                                            />
+                                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
 
-                                            <Field
-                                                label="Business type"
-                                                value={data.business_type}
-                                                onChange={(v) => setData('business_type', v)}
-                                                error={errors.business_type}
-                                                placeholder="General shop"
-                                            />
+                                    <StatCard
+                                        label="Today's Collections"
+                                        value={formatKES(sumOfTodayTransactions)}
+                                        description="Total M-Pesa received today"
+                                        accent="green"
+                                    />
 
-                                            <Field
-                                                label="Location"
-                                                value={data.location}
-                                                onChange={(v) => setData('location', v)}
-                                                error={errors.location}
-                                                placeholder="Nyeri, Kenya"
-                                            />
+                                    <StatCard
+                                        label="Total Collections"
+                                        value={formatKES(sumOfAllTransactions)}
+                                        description="All-time M-Pesa received"
+                                        accent="green"
+                                    />
 
-                                            <Field
-                                                label="Phone"
-                                                value={data.phone}
-                                                onChange={(v) => setData('phone', v)}
-                                                error={errors.phone}
-                                                placeholder="0712 456 789"
-                                            />
+                                </div>
 
-                                            <Field
-                                                label="Email"
-                                                value={data.email}
-                                                onChange={(v) => setData('email', v)}
-                                                error={errors.email}
-                                                placeholder="shop@example.com"
-                                                type="email"
-                                            />
-                                        </div>
+                            </section>
 
-                                        <Field
-                                            label="Address"
-                                            value={data.address}
-                                            onChange={(v) => setData('address', v)}
-                                            error={errors.address}
-                                            placeholder="Street, building, town"
-                                            textarea
-                                        />
+                            {/* ==================================================
+                                TRANSACTIONS
+                            ================================================== */}
 
-                                        <div className="flex items-center gap-4 pt-2">
-                                            <button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="rounded-xl bg-[#43B47E] px-5 py-3 text-sm font-bold text-[#101010] transition hover:bg-[#57C68E] disabled:opacity-60"
+                            <div className="mt-8">
+
+                                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#353538] bg-[#1B1B1D]">
+
+                                    <div className="flex items-center justify-between gap-4 border-b border-[#353538] px-5 py-5">
+
+                                        <div>
+                                            <h2
+                                                className="font-bold text-[#F5F5F5]"
                                                 style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
                                             >
-                                                {processing ? 'Saving...' : 'Save changes'}
-                                            </button>
+                                                Recent Transactions
+                                            </h2>
 
-                                            {recentlySuccessful && (
-                                                <span className="text-xs font-semibold text-[#43B47E]">
-                                                    Saved
-                                                </span>
-                                            )}
+                                            <p className="mt-1 text-xs text-[#A7A7AB]">
+                                                Latest M-Pesa activity for {shop.name}
+                                            </p>
                                         </div>
-                                    </form>
-                                </section>
-
-                                {/* ==================================================
-                                    SIDE SUMMARY
-                                ================================================== */}
-
-                                <div className="space-y-6">
-                                    <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
-                                        <h2
-                                            className="font-bold text-[#F5F5F5]"
-                                            style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                                        >
-                                            Current details
-                                        </h2>
-
-                                        <div className="mt-5 space-y-4">
-                                            <InfoItem label="Business" value={shop.name} />
-                                            <InfoItem label="Till" value={shop.till_number} mono />
-                                            <InfoItem label="Type" value={shop.business_type || '—'} />
-                                            <InfoItem label="Location" value={shop.location} />
-                                            <InfoItem label="Phone" value={shop.phone} />
-                                        </div>
-                                    </section>
-
-                                    <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
-                                        <h2
-                                            className="font-bold text-[#F5F5F5]"
-                                            style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                                        >
-                                            Manage tills
-                                        </h2>
-
-                                        <p className="mt-1 text-xs text-[#A7A7AB]">
-                                            Add or remove till numbers linked to this shop.
-                                        </p>
 
                                         <Link
-                                            href="/owner/tills"
-                                            className="mt-5 block rounded-xl border border-[#353538] px-4 py-3 text-center text-sm font-bold text-[#F5F5F5] transition hover:border-[#43B47E] hover:text-[#43B47E]"
+                                            href={`/owner/shop/${shop.id}/transactions`}
+                                            className="shrink-0 text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
                                         >
-                                            Go to tills
+                                            View all
                                         </Link>
-                                    </section>
-                                </div>
+
+                                    </div>
+
+                                    {/* Table header */}
+                                    <div className="hidden grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] border-b border-[#353538] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB] md:grid">
+
+                                        <span>Reference</span>
+                                        <span>Customer</span>
+                                        <span>Till</span>
+                                        <span>Amount</span>
+                                        <span>Status</span>
+
+                                    </div>
+
+                                    {/* Rows */}
+                                    <div className="divide-y divide-[#353538]">
+                                        {latestTransactions.length === 0 && (
+                                            <p className="px-5 py-6 text-sm text-[#A7A7AB]">
+                                                No transactions yet for this shop.
+                                            </p>
+                                        )}
+
+                                        {latestTransactions.map((transaction) => (
+                                            <TransactionRow
+                                                key={transaction.id}
+                                                transaction={transaction}
+                                            />
+                                        ))}
+
+                                    </div>
+
+                                </section>
+
                             </div>
+
+                            {/* ==================================================
+                                SHOP PROFILE
+                            ================================================== */}
+
+                            <div className="mt-6">
+
+                                <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
+
+                                    <div className="flex items-start justify-between gap-4">
+
+                                        <div>
+                                            <h2
+                                                className="font-bold text-[#F5F5F5]"
+                                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                            >
+                                                Shop profile
+                                            </h2>
+
+                                            <p className="mt-1 text-xs text-[#A7A7AB]">
+                                                Business information
+                                            </p>
+                                        </div>
+
+                                        <Link
+                                            href={`/owner/shop/${shop.id}/edit`}
+                                            className="text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
+                                        >
+                                            Manage
+                                        </Link>
+
+                                    </div>
+
+                                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            label="Business"
+                                            value={shop.name}
+                                        />
+
+                                        <InfoItem
+                                            label="Till"
+                                            value={shop.till_number}
+                                        />
+
+                                        <InfoItem
+                                            label="Location"
+                                            value={shop.location}
+                                        />
+
+                                        <InfoItem
+                                            label="Phone"
+                                            value={shop.phone}
+                                        />
+
+                                    </div>
+
+                                </section>
+
+                            </div>
+
                         </div>
+
                     </main>
+
                 </div>
             </div>
         </>
@@ -325,7 +395,11 @@ type NavItemProps = {
     active?: boolean;
 };
 
-function NavItem({ label, href, active = false }: NavItemProps) {
+function NavItem({
+    label,
+    href,
+    active = false,
+}: NavItemProps) {
     return (
         <Link
             href={href}
@@ -343,7 +417,90 @@ function NavItem({ label, href, active = false }: NavItemProps) {
 
 /*
 |--------------------------------------------------------------------------
-| Owner Menu
+| Shop Nav Dropdown
+|--------------------------------------------------------------------------
+*/
+
+type ShopNavDropdownProps = {
+    shops: Shop[];
+    activeShopId: number;
+};
+
+function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdownProps) {
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setOpen(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div ref={dropdownRef} className="relative mb-1">
+
+            <button
+                type="button"
+                onClick={() => setOpen((prev) => !prev)}
+                className={[
+                    'flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+                    open
+                        ? 'bg-[#242426] text-[#F5F5F5]'
+                        : 'text-[#F5F5F5] hover:bg-[#242426]',
+                ].join(' ')}
+            >
+                <span>Shops</span>
+
+                <span
+                    className={`text-xs text-[#A7A7AB] transition-transform ${open ? 'rotate-180' : ''}`}
+                >
+                    ▾
+                </span>
+            </button>
+
+            {open && (
+                <div className="mt-1 space-y-0.5 pl-2">
+
+                    {shops.length === 0 && (
+                        <p className="px-3 py-2 text-xs text-[#A7A7AB]">
+                            No shops yet
+                        </p>
+                    )}
+
+                    {shops.map((shop) => (
+                        <Link
+                            key={shop.id}
+                            href={`/owner/shop/${shop.id}`}
+                            className={[
+                                'block rounded-lg px-3 py-2 text-sm transition',
+                                shop.id === activeShopId
+                                    ? 'bg-[#43B47E]/15 text-[#5FD69B]'
+                                    : 'text-[#A7A7AB] hover:bg-[#242426] hover:text-[#F5F5F5]',
+                            ].join(' ')}
+                            onClick={() => setOpen(false)}
+                        >
+                            {shop.name}
+                        </Link>
+                    ))}
+
+                </div>
+            )}
+
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Owner Menu (profile trigger + dropdown)
 |--------------------------------------------------------------------------
 */
 
@@ -357,7 +514,10 @@ function OwnerMenu({ auth }: OwnerMenuProps) {
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
                 setOpen(false);
             }
         }
@@ -367,9 +527,15 @@ function OwnerMenu({ auth }: OwnerMenuProps) {
     }, []);
 
     return (
-        <div ref={menuRef} className="relative border-t border-[#353538] p-5">
+        <div
+            ref={menuRef}
+            className="relative border-t border-[#353538] p-5"
+        >
+
+            {/* Dropdown */}
             {open && (
                 <div className="absolute bottom-full left-5 right-5 mb-2 overflow-hidden rounded-xl border border-[#353538] bg-[#242426] shadow-lg">
+
                     <Link
                         href="/owner/profile"
                         className="block px-4 py-3 text-sm font-semibold text-[#F5F5F5] hover:bg-[#2A2A2D]"
@@ -385,14 +551,17 @@ function OwnerMenu({ auth }: OwnerMenuProps) {
                     >
                         Logout
                     </button>
+
                 </div>
             )}
 
+            {/* Trigger */}
             <button
                 type="button"
                 onClick={() => setOpen((prev) => !prev)}
                 className="flex w-full items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-[#242426]"
             >
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#43B47E] text-sm font-bold text-[#101010]">
                     {getInitials(auth.user.name)}
                 </div>
@@ -402,106 +571,162 @@ function OwnerMenu({ auth }: OwnerMenuProps) {
                         {auth.user.name}
                     </p>
 
-                    <p className="text-xs text-[#A7A7AB]">Owner</p>
+                    <p className="text-xs text-[#A7A7AB]">
+                        {auth.user.email}
+                    </p>
                 </div>
 
-                <span className="shrink-0 text-[#A7A7AB]">⋮</span>
+                <span className="shrink-0 text-[#A7A7AB]">
+                    ⋮
+                </span>
+
             </button>
+
         </div>
     );
 }
 
 /*
 |--------------------------------------------------------------------------
-| Field
+| Stat Card
 |--------------------------------------------------------------------------
 */
 
-type FieldProps = {
+type StatCardProps = {
     label: string;
     value: string;
-    onChange: (value: string) => void;
-    error?: string;
-    placeholder?: string;
-    type?: string;
-    mono?: boolean;
-    textarea?: boolean;
+    description: string;
+    accent: 'green' | 'yellow' | 'red';
 };
 
-function Field({
+function StatCard({
     label,
     value,
-    onChange,
-    error,
-    placeholder,
-    type = 'text',
-    mono = false,
-    textarea = false,
-}: FieldProps) {
-    const baseClass = [
-        'mt-2 w-full rounded-xl border bg-[#242426] px-4 py-3 text-sm text-[#F5F5F5]',
-        'placeholder:text-[#6B6B6E] outline-none transition',
-        'focus:border-[#43B47E]',
-        error ? 'border-[#FF6B6B]' : 'border-[#353538]',
-        mono ? 'font-mono' : '',
-    ].join(' ');
+    description,
+    accent,
+}: StatCardProps) {
+
+    const accentStyles = {
+        green: 'bg-[#43B47E]',
+        yellow: 'bg-[#F2B84B]',
+        red: 'bg-[#FF6B6B]',
+    };
 
     return (
-        <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
-                {label}
-            </label>
+        <div className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
-            {textarea ? (
-                <textarea
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={placeholder}
-                    rows={3}
-                    className={baseClass}
-                />
-            ) : (
-                <input
-                    type={type}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className={baseClass}
-                />
-            )}
+            <div className="flex items-center justify-between gap-3">
 
-            {error && (
-                <p className="mt-1.5 text-xs font-semibold text-[#FF6B6B]">{error}</p>
-            )}
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
+                    {label}
+                </p>
+
+                <span
+                    className={`h-2 w-2 rounded-full ${accentStyles[accent]}`}
+                />
+
+            </div>
+
+            <p className="mt-4 font-mono text-2xl font-bold tracking-tight text-[#F5F5F5]">
+                {value}
+            </p>
+
+            <p className="mt-2 text-xs text-[#A7A7AB]">
+                {description}
+            </p>
+
         </div>
     );
 }
 
 /*
 |--------------------------------------------------------------------------
-| Info Item
+| Transaction Row
+|--------------------------------------------------------------------------
+*/
+
+type TransactionRowProps = {
+    transaction: Transaction;
+};
+
+function TransactionRow({
+    transaction,
+}: TransactionRowProps) {
+
+    const statusClass = {
+        Matched: 'bg-[#43B47E]/15 text-[#5FD69B]',
+        Pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
+        Unmatched: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+        Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+    }[transaction.status];
+
+    return (
+        <div className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.8fr_0.9fr_0.8fr] md:items-center">
+
+            <div>
+                <p className="font-mono text-sm font-semibold text-[#F5F5F5]">
+                    {transaction.sender_name}
+                </p>
+
+                <p className="mt-1 text-[11px] text-[#A7A7AB]">
+                    {transaction.mpesa_receipt_number}
+                </p>
+            </div>
+
+            <div className="text-sm text-[#F5F5F5]">
+
+                <p>
+                    {transaction.phone_number}
+                </p>
+
+                <p className="mt-1 text-[11px] text-[#A7A7AB]">
+                    {transaction.time}
+                </p>
+
+            </div>
+
+            <div className="text-sm text-[#A7A7AB]">
+                {transaction.till_number}
+            </div>
+
+            <div className="font-mono text-sm font-semibold text-[#F5F5F5]">
+                {formatKES(transaction.amount)}
+            </div>
+
+            <div>
+                <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${statusClass}`}
+                >
+                    {transaction.status}
+                </span>
+            </div>
+
+        </div>
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Information Item
 |--------------------------------------------------------------------------
 */
 
 type InfoItemProps = {
     label: string;
     value: string;
-    mono?: boolean;
 };
 
-function InfoItem({ label, value, mono = false }: InfoItemProps) {
+function InfoItem({
+    label,
+    value,
+}: InfoItemProps) {
     return (
         <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
                 {label}
             </p>
 
-            <p
-                className={[
-                    'mt-1 text-sm font-semibold text-[#F5F5F5]',
-                    mono ? 'font-mono' : '',
-                ].join(' ')}
-            >
+            <p className="mt-1 text-sm font-semibold text-[#F5F5F5]">
                 {value}
             </p>
         </div>

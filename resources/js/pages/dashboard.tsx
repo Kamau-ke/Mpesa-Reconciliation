@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import ShopNavDropdown from '@/components/ShopNavDropdown';
 import OwnerMenu from '@/components/owner-menu';
 import {getInitials} from '@/utils'
+import { handleLogout } from '@/utils';
 import NavBar from '@/components/nav-bar';
 
 type TransactionStatus =
@@ -101,9 +102,7 @@ function formatKES(amount: number) {
 
 
 
-function handleLogout() {
-    router.post('/logout');
-}
+
 
 export default function Dashboard({latestTransactions, sumOfAllTransactions, sumOfTodayTransactions, shops, activeShopId}) {
     const { auth } = usePage<PageProps>().props;

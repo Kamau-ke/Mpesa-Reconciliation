@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shop;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -40,7 +41,12 @@ class ShopController extends Controller
     }
 
     public function show(Shop $shop){
-        return Inertia::render('shop', compact('shop'));
+    $activeShopId=$shop->id;
+    $latestTransactions=$shop->transactions()->latest()->take(10)->get();
+    $sumOfAllTransactions=$shop->transactions()->sum('amount');
+    $sumOfTodayTransactions=$shop->transactions()->whereDate('created_at', Carbon::now())->sum('amount');
+    
+        return Inertia::render('shop', compact('shop','activeShopId' , 'latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions'));
     }
 
     public function edit(Shop $shop){
