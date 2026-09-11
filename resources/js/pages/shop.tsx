@@ -1,6 +1,9 @@
 import NavBar from '@/components/nav-bar';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage, useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+
+
+
 
 type TransactionStatus =
     | 'success'
@@ -74,6 +77,7 @@ function handleLogout() {
 
 
 
+
 export default function Shop({
     shop,
     shops,
@@ -83,6 +87,37 @@ export default function Shop({
     sumOfTodayTransactions,
 }: ShopProps) {
     const { auth } = usePage<PageProps>().props;
+
+
+    const [isEditingShop, setIsEditingShop] = useState(false);
+
+    const {
+    data: shopForm,
+    setData: setShopForm,
+    put,
+    processing,
+    errors,
+    reset,
+} = useForm({
+    name: shop.name,
+    till_number: shop.till_number,
+    location: shop.location,
+    phone: shop.phone,
+});
+
+function handleShopUpdate(e: React.FormEvent) {
+    e.preventDefault();
+
+    put(`/owner/shop/${shop.id}`, {
+        preserveScroll: true,
+        onSuccess: () => setIsEditingShop(false),
+    });
+}
+
+function cancelEdit() {
+    reset();
+    setIsEditingShop(false);
+}
 
     return (
         <>
@@ -248,61 +283,137 @@ export default function Shop({
                                 SHOP PROFILE
                             ================================================== */}
 
-                            <div className="mt-6">
+                <div className="mt-6">
 
-                                <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
+                    <section className="rounded-2xl border border-[#353538] bg-[#1B1B1D] p-5">
 
-                                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start justify-between gap-4">
 
-                                        <div>
-                                            <h2
-                                                className="font-bold text-[#F5F5F5]"
-                                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                                            >
-                                                Shop profile
-                                            </h2>
+                            <div>
+                                <h2
+                                    className="font-bold text-[#F5F5F5]"
+                                    style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
+                                >
+                                    Shop profile
+                                </h2>
 
-                                            <p className="mt-1 text-xs text-[#A7A7AB]">
-                                                Business information
-                                            </p>
-                                        </div>
+                                <p className="mt-1 text-xs text-[#A7A7AB]">
+                                    Business information
+                                </p>
+                            </div>
 
-                                        <Link
-                                            href={`/owner/shop/${shop.id}/edit`}
-                                            className="text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
-                                        >
-                                            Manage
-                                        </Link>
+                            {!isEditingShop && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditingShop(true)}
+                                    className="text-sm font-bold text-[#43B47E] hover:text-[#57C68E]"
+                                >
+                                    Manage
+                                </button>
+                            )}
 
+                        </div>
+
+                        {isEditingShop ? (
+                            <form onSubmit={handleShopUpdate} className="mt-6 space-y-5">
+
+                                <div className="grid gap-5 sm:grid-cols-2">
+
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
+                                            Business
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={shopForm.name}
+                                            onChange={(e) => setShopForm('name', e.target.value)}
+                                            className="mt-1 w-full rounded-lg border border-[#353538] bg-[#242426] px-3 py-2 text-sm font-semibold text-[#F5F5F5] focus:border-[#43B47E] focus:outline-none"
+                                        />
+                                        {errors.name && (
+                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.name}</p>
+                                        )}
                                     </div>
 
-                                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
-
-                                        <InfoItem
-                                            label="Business"
-                                            value={shop.name}
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
+                                            Till
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={shopForm.till_number}
+                                            onChange={(e) => setShopForm('till_number', e.target.value)}
+                                            className="mt-1 w-full rounded-lg border border-[#353538] bg-[#242426] px-3 py-2 text-sm font-semibold text-[#F5F5F5] focus:border-[#43B47E] focus:outline-none"
                                         />
-
-                                        <InfoItem
-                                            label="Till"
-                                            value={shop.till_number}
-                                        />
-
-                                        <InfoItem
-                                            label="Location"
-                                            value={shop.location}
-                                        />
-
-                                        <InfoItem
-                                            label="Phone"
-                                            value={shop.phone}
-                                        />
-
+                                        {errors.till_number && (
+                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.till_number}</p>
+                                        )}
                                     </div>
 
-                                </section>
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
+                                            Location
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={shopForm.location}
+                                            onChange={(e) => setShopForm('location', e.target.value)}
+                                            className="mt-1 w-full rounded-lg border border-[#353538] bg-[#242426] px-3 py-2 text-sm font-semibold text-[#F5F5F5] focus:border-[#43B47E] focus:outline-none"
+                                        />
+                                        {errors.location && (
+                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.location}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-[#A7A7AB]">
+                                            Phone
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={shopForm.phone}
+                                            onChange={(e) => setShopForm('phone', e.target.value)}
+                                            className="mt-1 w-full rounded-lg border border-[#353538] bg-[#242426] px-3 py-2 text-sm font-semibold text-[#F5F5F5] focus:border-[#43B47E] focus:outline-none"
+                                        />
+                                        {errors.phone && (
+                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.phone}</p>
+                                        )}
+                                    </div>
+
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="rounded-xl bg-[#43B47E] px-4 py-2 text-sm font-bold text-[#101010] transition hover:bg-[#57C68E] disabled:opacity-50"
+                                    >
+                                        {processing ? 'Saving...' : 'Save changes'}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="rounded-xl border border-[#353538] px-4 py-2 text-sm font-bold text-[#F5F5F5] transition hover:bg-[#242426]"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+
+                            </form>
+                        ) : (
+                            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+                                <InfoItem label="Business" value={shop.name} />
+                                <InfoItem label="Till" value={shop.till_number} />
+                                <InfoItem label="Location" value={shop.location} />
+                                <InfoItem label="Phone" value={shop.phone} />
 
                             </div>
+                        )}
+
+                    </section>
+
+</div>
 
                         </div>
 
@@ -586,7 +697,7 @@ function TransactionRow({
 
     const statusClass = {
         success: 'bg-[#43B47E]/15 text-[#5FD69B]',
-        failed: 'bg-[#F2B84B]/15 text-[#F2B84B]',
+        pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
         cancelled: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     }[transaction.status];
 
