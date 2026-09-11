@@ -96,29 +96,7 @@ export default function Shop({
                         SIDEBAR
                     ====================================================== */}
 
-                    <aside className="hidden w-64 shrink-0 border-r border-[#353538] bg-[#1B1B1D] lg:flex lg:flex-col">
-
-                        {/* Logo */}
-                        <div className="px-6 pb-8 pt-7">
-                            <div
-                                className="text-2xl font-bold tracking-tight text-[#F5F5F5]"
-                                style={{ fontFamily: '"Baloo 2", ui-rounded, sans-serif' }}
-                            >
-                                kadogo
-                            </div>
-
-                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#A7A7AB]">
-                                M-Pesa Reconciliation
-                            </p>
-                        </div>
-
-                        {/* Navigation */}
-                       <NavBar shops={shops} activeShopId={activeShopId}/>
-
-                        {/* Owner */}
-                        <OwnerMenu auth={auth} />
-
-                    </aside>
+                     <NavBar shops={shops} activeShopId={activeShopId}/>
 
                     {/* ======================================================
                         MAIN
