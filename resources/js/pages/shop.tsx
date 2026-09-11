@@ -3,10 +3,9 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
 type TransactionStatus =
-    | 'Matched'
-    | 'Pending'
-    | 'Unmatched'
-    | 'Failed';
+    | 'success'
+    | 'pending'
+    | 'cancelled'
 
 type Transaction = {
     id: number;
@@ -219,7 +218,6 @@ export default function Shop({
 
                                         <span>Reference</span>
                                         <span>Customer</span>
-                                        <span>Till</span>
                                         <span>Amount</span>
                                         <span>Status</span>
 
@@ -587,10 +585,9 @@ function TransactionRow({
 }: TransactionRowProps) {
 
     const statusClass = {
-        Matched: 'bg-[#43B47E]/15 text-[#5FD69B]',
-        Pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
-        Unmatched: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
-        Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+        success: 'bg-[#43B47E]/15 text-[#5FD69B]',
+        failed: 'bg-[#F2B84B]/15 text-[#F2B84B]',
+        cancelled: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     }[transaction.status];
 
     return (
@@ -618,9 +615,9 @@ function TransactionRow({
 
             </div>
 
-            <div className="text-sm text-[#A7A7AB]">
+            {/* <div className="text-sm text-[#A7A7AB]">
                 {transaction.till_number}
-            </div>
+            </div> */}
 
             <div className="font-mono text-sm font-semibold text-[#F5F5F5]">
                 {formatKES(transaction.amount)}
