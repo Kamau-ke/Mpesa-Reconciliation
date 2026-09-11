@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import {show} from '@/routes';
+import ShopController from '@/actions/App/Http/Controllers/ShopController';
 // import type { Shop } from '@/types'
 
 type ShopNavDropdownProps = {
@@ -52,7 +52,7 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                         : 'text-[#F5F5F5] hover:bg-[#242426]',
                 ].join(' ')}
             >
-                {console.log(open)}
+                
                 <span className="truncate">
                     {activeShop ? activeShop.name : 'Shops'}
                 </span>
@@ -81,7 +81,7 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
                 return (
                     <Link
                             key={shop.id}
-                            href={show.shop({ shop: shop.id })}
+                            href={ShopController.show(shop.id)}
                             onClick={() => setOpen(false)}
                             className={[
                                 'block w-full rounded-lg px-3 py-2 text-left text-sm transition',

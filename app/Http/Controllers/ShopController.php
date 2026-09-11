@@ -45,8 +45,9 @@ class ShopController extends Controller
     $latestTransactions=$shop->transactions()->latest()->take(10)->get();
     $sumOfAllTransactions=$shop->transactions()->sum('amount');
     $sumOfTodayTransactions=$shop->transactions()->whereDate('created_at', Carbon::now())->sum('amount');
+    $shops=auth()->user()->shop()->get();
     
-        return Inertia::render('shop', compact('shop','activeShopId' , 'latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions'));
+        return Inertia::render('shop', compact('shop','shops', 'activeShopId' , 'latestTransactions', 'sumOfAllTransactions', 'sumOfTodayTransactions'));
     }
 
     public function edit(Shop $shop){

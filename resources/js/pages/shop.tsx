@@ -1,3 +1,4 @@
+import NavBar from '@/components/nav-bar';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -112,53 +113,7 @@ export default function Shop({
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 px-4">
-
-                            <NavItem
-                                label="Dashboard"
-                                href="/owner/dashboard"
-                            />
-
-                            <NavItem
-                                label="Transactions"
-                                href="/owner/transactions"
-                            />
-
-                            <NavItem
-                                label="Reconciliation"
-                                href="/owner/reconciliation"
-                            />
-
-                            <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
-                                    Shop
-                                </p>
-                            </div>
-
-                            <ShopNavDropdown shops={shops} activeShopId={activeShopId} />
-
-                            <NavItem
-                                label="Profile"
-                                href="/owner/profile"
-                            />
-
-                            <div className="pb-2 pt-7">
-                                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A7A7AB]">
-                                    Management
-                                </p>
-                            </div>
-
-                            <NavItem
-                                label="Employees"
-                                href="/owner/employees"
-                            />
-
-                            <NavItem
-                                label="Tills"
-                                href="/owner/tills"
-                            />
-
-                        </nav>
+                       <NavBar shops={shops} activeShopId={activeShopId}/>
 
                         {/* Owner */}
                         <OwnerMenu auth={auth} />
