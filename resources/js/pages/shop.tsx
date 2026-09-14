@@ -130,7 +130,7 @@ function cancelEdit() {
                         SIDEBAR
                     ====================================================== */}
 
-                     <NavBar shops={shops} activeShopId={activeShopId}/>
+                     <NavBar shops={shops} activeShopId={activeShopId} showTransactionsTab={true}/>
 
                     {/* ======================================================
                         MAIN

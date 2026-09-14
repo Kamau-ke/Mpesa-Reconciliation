@@ -12,11 +12,12 @@ interface Shop {
 
 interface NavBarProps {
   shops: Shop[];            
-  activeShopId: number;     
+  activeShopId: number;    
+  showTransactionsTab?: boolean; 
 }
 
 
-export default function NavBar({ shops, activeShopId }: NavBarProps) {
+export default function NavBar({ shops, activeShopId, showTransactionsTab=false }: NavBarProps) {
 
    
    
@@ -47,10 +48,14 @@ export default function NavBar({ shops, activeShopId }: NavBarProps) {
                     active
                 />
 
-                <NavItem
+                {showTransactionsTab && (
+                    <NavItem
                     label="Transactions"
                     href="/owner/transactions"
                 />
+                )}
+
+                
 
                 <NavItem
                     label="Reconciliation"
