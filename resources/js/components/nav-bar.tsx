@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import NavItem from './nav-item';
 import ShopNavDropdown from './ShopNavDropdown';
 import { getInitials } from '@/utils';
+import { dashboard } from '@/routes';
 
 interface Shop {
   id: number;
@@ -42,7 +43,7 @@ export default function NavBar({ shops, activeShopId }: NavBarProps) {
 
                 <NavItem
                     label="Dashboard"
-                    href="/owner/dashboard"
+                    href={dashboard()}
                     active
                 />
 
