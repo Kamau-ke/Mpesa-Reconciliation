@@ -4,6 +4,7 @@ import NavItem from './nav-item';
 import ShopNavDropdown from './ShopNavDropdown';
 import { getInitials } from '@/utils';
 import { dashboard } from '@/routes';
+import { showTransactions } from '@/routes';
 
 interface Shop {
   id: number;
@@ -51,7 +52,7 @@ export default function NavBar({ shops, activeShopId, showTransactionsTab=false 
                 {showTransactionsTab && (
                     <NavItem
                     label="Transactions"
-                    href="/owner/transactions"
+                    href={showTransactions(activeShopId)}
                 />
                 )}
 
