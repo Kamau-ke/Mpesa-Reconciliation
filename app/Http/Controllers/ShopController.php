@@ -84,11 +84,13 @@ class ShopController extends Controller
      }
 
      public function showTransactions($shopId){
+        $activeShopId=$shopId;
+        $shops=auth()->user()->shop()->get();
         
         $shop=auth()->user()->shop()->findOrFail($shopId);
         $transactions=$shop->transactions()->latest()->get();
-        dd($transactions);
-        return 'Transactions';
+        
+        return inertia::render('shop-transactions', compact('shop', 'transactions', 'activeShopId', 'shops'));
      }
 
     //  get daily transactions

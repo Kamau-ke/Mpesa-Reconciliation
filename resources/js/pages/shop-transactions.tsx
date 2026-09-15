@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import NavBar from '@/components/nav-bar';
 
-type TransactionStatus = 'Matched' | 'Pending' | 'Unmatched' | 'Failed';
+type TransactionStatus = 'success' | 'Pending' | 'cancelled' | 'Failed';
 
 type Transaction = {
     id: number;
@@ -71,10 +71,12 @@ export default function ShopTransactions({
         );
     }
 
+    console.log(transactions);
+
     const statusClass: Record<TransactionStatus, string> = {
-        Matched: 'bg-[#43B47E]/15 text-[#5FD69B]',
+        success: 'bg-[#43B47E]/15 text-[#5FD69B]',
         Pending: 'bg-[#F2B84B]/15 text-[#F2B84B]',
-        Unmatched: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
+        cancelled: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
         Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     };
 
@@ -89,7 +91,7 @@ export default function ShopTransactions({
                         shops={shops}
                         activeShopId={activeShopId}
                         showTransactionsTab
-                        transactionsHref={`/shop/${shop.id}/transactions`}
+                        // transactionsHref={`/shop/${shop.id}/transactions`}
                     />
 
                     <main className="min-w-0 flex-1">
@@ -139,13 +141,13 @@ export default function ShopTransactions({
 
                                 <div className="divide-y divide-[#353538]">
 
-                                    {transactions.data.length === 0 && (
+                                    {transactions.length === 0 && (
                                         <p className="px-5 py-6 text-sm text-[#A7A7AB]">
                                             No transactions found for this period.
                                         </p>
                                     )}
 
-                                    {transactions.data.map((t) => (
+                                    {transactions.map((t) => (
                                         <div
                                             key={t.id}
                                             className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.9fr_0.8fr] md:items-center"
