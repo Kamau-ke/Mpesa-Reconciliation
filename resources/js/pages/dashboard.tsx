@@ -1,10 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import ShopNavDropdown from '@/components/ShopNavDropdown';
+import NavBar from '@/components/nav-bar';
 import OwnerMenu from '@/components/owner-menu';
+import ShopNavDropdown from '@/components/ShopNavDropdown';
 import {getInitials} from '@/utils'
 import { handleLogout } from '@/utils';
-import NavBar from '@/components/nav-bar';
 
 type TransactionStatus =
     | 'Matched'

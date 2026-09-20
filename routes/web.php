@@ -7,7 +7,7 @@ use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/staff', [EmployeeController::class,'index']);
+Route::get('/staff', [EmployeeController::class, 'index']);
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::inertia('dashboard', 'dashboard')->name('dashboard');
@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
     Route::get('/owner/shops/{shop}', [ShopController::class, 'show'])->name('shop.show');
+    Route::put('/owner/shops/{shop}', [ShopController::class, 'update'])->name('shop.update');
     Route::get('/shop/{shopId}/transactions', [ShopController::class, 'showTransactions'])->name('showTransactions');
 });
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('merchant_request_id');
             $table->string('checkout_request_id');
             $table->string('mpesa_receipt_number');
-            $table->decimal('amount', 10,2);
+            $table->decimal('amount', 10, 2);
             $table->string('phone_number');
             $table->timestamp('transaction_date');
             $table->enum('status', ['pending', 'success', 'failed', 'cancelled'])->default('success');

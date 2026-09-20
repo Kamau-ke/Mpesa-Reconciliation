@@ -1,8 +1,8 @@
 // resources/js/components/kadogo/dashboard/top-bar.tsx
 
 import { Link, usePage } from '@inertiajs/react';
-import { useAuth } from '@/hooks/use-auth';
 import { useMemo } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/routes';
 import type { Shop } from '@/types/dashboard';
 
@@ -15,6 +15,7 @@ const DISPLAY = '"Baloo 2", ui-rounded, sans-serif';
 
 function initials(name: string): string {
     const parts = name.trim().split(/\s+/);
+
     return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase();
 }
 

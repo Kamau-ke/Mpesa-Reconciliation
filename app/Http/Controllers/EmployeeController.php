@@ -10,11 +10,11 @@ use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
-
-    public function index(){
+    public function index()
+    {
         return inertia('staff');
     }
-   
+
     public function store(Request $request): RedirectResponse
     {
         $owner = $this->owner($request);

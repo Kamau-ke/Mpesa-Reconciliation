@@ -23,6 +23,7 @@ export default function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdown
         }
 
         document.addEventListener('mousedown', handleClickOutside);
+
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 

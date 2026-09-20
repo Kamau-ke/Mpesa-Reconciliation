@@ -15,18 +15,18 @@ class Shop extends Model
 
     protected $fillable = ['name', 'till_number', 'location', 'currency', 'passkey', 'user_id'];
 
-    
-
-
-    public function user():BelongsTo{
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function transactions():HasMany{
+    public function transactions(): HasMany
+    {
         return $this->hasMany(Transaction::class);
     }
 
-    public function staffMembers():HasMany{
+    public function staffMembers(): HasMany
+    {
         return $this->hasMany(User::class, 'shop_id');
     }
 }

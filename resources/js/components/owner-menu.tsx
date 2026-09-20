@@ -21,6 +21,7 @@ export default function OwnerMenu({ auth }: OwnerMenuProps) {
         }
 
         document.addEventListener('mousedown', handleClickOutside);
+
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 

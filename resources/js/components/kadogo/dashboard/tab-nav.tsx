@@ -66,6 +66,7 @@ export default function TabNav({ active, onChange, isOwner }: Props) {
         >
             {tabs.map(({ key, label, icon: Icon }) => {
                 const isActive = active === key;
+
                 return (
                     <button
                         key={key}

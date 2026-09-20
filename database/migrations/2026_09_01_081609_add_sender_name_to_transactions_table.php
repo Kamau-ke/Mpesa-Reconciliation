@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             //
-             $table->string('sender_name')->nullable()->after('phone');
+            $table->string('sender_name')->nullable()->after('phone');
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             //
-             $table->dropColumn('sender_name');
+            $table->dropColumn('sender_name');
         });
     }
 };

@@ -1,9 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
-import Seo from '@/components/kadogo/seo';
 import CoinDoodle from '@/components/kadogo/coin-doodle';
-import ScallopDivider from '@/components/kadogo/scallop-divider';
-import StallCard from '@/components/kadogo/stall-card';
 import Dock from '@/components/kadogo/dock';
+import ScallopDivider from '@/components/kadogo/scallop-divider';
+import Seo from '@/components/kadogo/seo';
+import StallCard from '@/components/kadogo/stall-card';
 import { dashboard, register } from '@/routes';
 
 const CREAM = '#F5F5F5';
@@ -154,7 +154,9 @@ function StallPreview() {
 }
 
 function Cta({ isAuthenticated }: { isAuthenticated: boolean }) {
-    if (isAuthenticated) return null;
+    if (isAuthenticated) {
+return null;
+}
 
     return (
         <section className="py-24 px-6 text-center" style={{ background: AVOCADO, color: CREAM }}>

@@ -1,6 +1,7 @@
-import NavBar from '@/components/nav-bar';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import NavBar from '@/components/nav-bar';
+import { shop } from '@/routes'
 
 
 
@@ -108,7 +109,7 @@ export default function Shop({
 function handleShopUpdate(e: React.FormEvent) {
     e.preventDefault();
 
-    put(`/owner/shop/${shop.id}`, {
+    put(`/owner/shops/${shop.id}`, {
         preserveScroll: true,
         onSuccess: () => setIsEditingShop(false),
     });
@@ -483,6 +484,7 @@ function ShopNavDropdown({ shops, activeShopId }: ShopNavDropdownProps) {
         }
 
         document.addEventListener('mousedown', handleClickOutside);
+
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
@@ -565,6 +567,7 @@ function OwnerMenu({ auth }: OwnerMenuProps) {
         }
 
         document.addEventListener('mousedown', handleClickOutside);
+
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 

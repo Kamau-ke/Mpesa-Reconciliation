@@ -18,6 +18,7 @@ function SearchIcon() {
 
 function StatusPill({ status }: { status: Transaction['status'] }) {
     const paid = status === 'paid';
+
     return (
         <span
             className="inline-block text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full"

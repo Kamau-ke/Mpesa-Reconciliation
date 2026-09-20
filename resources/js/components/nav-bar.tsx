@@ -1,9 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { dashboard, showTransactions } from '@/routes';
+import { getInitials } from '@/utils';
 import NavItem from './nav-item';
 import ShopNavDropdown from './ShopNavDropdown';
-import { getInitials } from '@/utils';
-import { dashboard, showTransactions } from '@/routes';
 
 interface Shop {
   id: number;

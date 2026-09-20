@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
@@ -23,10 +22,11 @@ class Transaction extends Model
         'status',
         'result_code',
         'result_desc',
-        'raw_payload'
+        'raw_payload',
     ];
 
-    public function shop():BelongsTo{
+    public function shop(): BelongsTo
+    {
         return $this->belongsTo(Shop::class);
     }
 }

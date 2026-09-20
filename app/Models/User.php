@@ -47,40 +47,38 @@ class User extends Authenticatable implements PasskeyUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            /* @chisel-2fa */
             'two_factor_confirmed_at' => 'datetime',
-            /* @end-chisel-2fa */
         ];
     }
 
-    public function shop():HasMany{
+    public function shop(): HasMany
+    {
         return $this->hasMany(Shop::class);
     }
 
-    // for staffs 
-     public function assignedShop(): BelongsTo
+    // for staffs
+    public function assignedShop(): BelongsTo
     {
         return $this->belongsTo(Shop::class, 'shop_id');
     }
 
-   
-
-    public function isOwner(){
-        return $this->role==='owner';
+    public function isOwner()
+    {
+        return $this->role === 'owner';
     }
 
-    public function isStaff(){
-        return $this->role==='staff';
+    public function isStaff()
+    {
+        return $this->role === 'staff';
     }
 
-    public function isActive(){
-        return $this->status==='active';
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 
-    public function transactions():HasManyThrough{
+    public function transactions(): HasManyThrough
+    {
         return $this->hasManyThrough(Transaction::class, Shop::class, 'user_id', 'shop_id');
     }
-
-
-    
 }
