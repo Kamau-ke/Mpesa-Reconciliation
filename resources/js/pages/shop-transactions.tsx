@@ -71,7 +71,7 @@ export default function ShopTransactions({
         );
     }
 
-    console.log(transactions);
+    // console.log(auth);
 
     const statusClass: Record<TransactionStatus, string> = {
         success: 'bg-[#43B47E]/15 text-[#5FD69B]',
@@ -79,6 +79,8 @@ export default function ShopTransactions({
         cancelled: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
         Failed: 'bg-[#FF6B6B]/15 text-[#FF6B6B]',
     };
+
+    {console.log(filter)}
 
     return (
         <>
@@ -142,16 +144,17 @@ export default function ShopTransactions({
                                 <div className="divide-y divide-[#353538]">
 
                                     {transactions.length === 0 && (
-                                        <p className="px-5 py-6 text-sm text-[#A7A7AB]">
-                                            No transactions found for this period.
-                                        </p>
-                                    )}
+                                            <p className="px-5 py-6 text-sm text-[#A7A7AB]">
+                                                {filter === 'today'
+                                                    ? 'No transactions made today.'
+                                                    : filter === 'week'
+                                                        ? 'No transactions made this week.'
+                                                        : 'No transactions found.'}
+                                            </p>
+                                        )}
 
                                     {transactions.map((t) => (
-                                        <div
-                                            key={t.id}
-                                            className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.9fr_0.8fr] md:items-center"
-                                        >
+                                        <div key={t.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.1fr_1fr_0.9fr_0.8fr] md:items-center">
                                             <div>
                                                 <p className="font-mono text-sm font-semibold text-[#F5F5F5]">
                                                     {t.mpesa_receipt_number}
