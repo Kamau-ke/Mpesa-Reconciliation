@@ -90,16 +90,35 @@ class ShopController extends Controller
         return 'shop deleted';
     }
 
-    public function showTransactions($shopId)
-    {
-        $activeShopId = $shopId;
-        $shops = auth()->user()->shop()->get();
+  public function showTransactions(Request $request, $shopId)
+{
+    $activeShopId = $shopId;
+    $shops = auth()->user()->shop()->get();
+    $shop = auth()->user()->shop()->findOrFail($shopId);
 
-        $shop = auth()->user()->shop()->findOrFail($shopId);
-        $transactions = $shop->transactions()->latest()->get();
+    $filter = $request->query('filter'); // 'daily', 'weekly', 'monthly'
 
-        return Inertia::render('shop-transactions', compact('shop', 'transactions', 'activeShopId', 'shops'));
+    if ($filter && !in_array($filter, ['today', 'week', 'all'])) {
+        abort(422, 'Invalid filter');
     }
+
+    $query = $shop->transactions()->latest();
+
+    match ($filter) {
+        'daily' => $query->whereDate('created_at', today()),
+        'weekly' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+        'monthly' => $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]),
+        default => null,
+    };
+
+    $transactions = $filter
+        ? $query->get()
+        : $query->take(10)->get();
+
+    return Inertia::render('shop-transactions', compact(
+        'shop', 'transactions', 'activeShopId', 'shops', 'filter'
+    ));
+}
 
     //  get daily transactions
 
