@@ -56,6 +56,8 @@ class ShopController extends Controller
 
     public function update(Request $request, Shop $shop)
     {
+
+       
         abort_unless($shop->user_id === auth()->id(), 403);
 
         $validated = $request->validate([
@@ -75,6 +77,8 @@ class ShopController extends Controller
                 ? Crypt::encryptString($validated['passkey'])
                 : $shop->passkey,
         ]);
+
+         dd($shop);
 
         return back();
     }
@@ -96,7 +100,7 @@ class ShopController extends Controller
     $shops = auth()->user()->shop()->get();
     $shop = auth()->user()->shop()->findOrFail($shopId);
 
-    $filter = $request->query('filter', 'all'); // 'today', 'week', 'all'
+    $filter = $request->query('filter', 'all'); 
 
     if (!in_array($filter, ['today', 'week', 'all'])) {
         abort(422, 'Invalid filter');
@@ -109,6 +113,8 @@ class ShopController extends Controller
         'week' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
         default => null, // 'all'
     };
+
+    
 
     $transactions = $query->get();
 
