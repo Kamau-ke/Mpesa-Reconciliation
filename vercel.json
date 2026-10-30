@@ -11,5 +11,7 @@
             "source": "/api/(.*)",
             "destination": "/api/labda.php"
         }
-    ]
+    ],
+    "buildCommand": "echo skip ..."
+
 }
