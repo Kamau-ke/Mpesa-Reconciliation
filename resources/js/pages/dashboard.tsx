@@ -87,7 +87,7 @@ const shop = {
     name: 'Kadogo Shop',
     till: 'Till 01',
     location: 'Nyeri, Kenya',
-    phone: '0712 456 789',
+    phone_number: '0712 456 789',
 };
 
 /*
@@ -431,7 +431,7 @@ export default function Dashboard({latestTransactions, sumOfAllTransactions, sum
 
                                         <InfoItem
                                             label="Phone"
-                                            value={shop.phone}
+                                            value={shop.phone_number}
                                         />
 
                                     </div>

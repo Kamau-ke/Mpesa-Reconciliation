@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('phone');
+            $table->string('phone_number');
             $table->enum('role', ['staff', 'owner']);
             $table->enum('status', ['active', 'deactivated'])->default('active');
             $table->unsignedBigInteger('shop_id')->nullable();

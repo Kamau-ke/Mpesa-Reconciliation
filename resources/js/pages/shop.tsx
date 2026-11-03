@@ -29,7 +29,7 @@ type Shop = {
     name: string;
     till_number: string;
     location: string;
-    phone: string;
+    phone_number: string;
 };
 
 type AuthUser = {
@@ -103,7 +103,7 @@ export default function Shop({
     name: shop.name,
     till_number: shop.till_number,
     location: shop.location,
-    phone: shop.phone,
+    phone_number: shop.phone_number,
 });
 
 function handleShopUpdate(e: React.FormEvent) {
@@ -371,12 +371,12 @@ function cancelEdit() {
                                         </label>
                                         <input
                                             type="text"
-                                            value={shopForm.phone}
-                                            onChange={(e) => setShopForm('phone', e.target.value)}
+                                            value={shopForm.phone_number}
+                                            onChange={(e) => setShopForm('phone_number', e.target.value)}
                                             className="mt-1 w-full rounded-lg border border-[#353538] bg-[#242426] px-3 py-2 text-sm font-semibold text-[#F5F5F5] focus:border-[#43B47E] focus:outline-none"
                                         />
-                                        {errors.phone && (
-                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.phone}</p>
+                                        {errors.phone_number && (
+                                            <p className="mt-1 text-xs text-[#FF6B6B]">{errors.phone_number}</p>
                                         )}
                                     </div>
 
