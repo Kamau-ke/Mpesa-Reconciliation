@@ -66,7 +66,7 @@ export default function Register({ passwordRules }: Props) {
                                     required
                                     tabIndex={3}
                                     autoComplete="tel"
-                                    name="phone"
+                                    name="phone_number"
                                     placeholder="Enter your phone number"
                                 />
                                 <InputError message={errors.phone} />
